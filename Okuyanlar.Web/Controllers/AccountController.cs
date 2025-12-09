@@ -66,6 +66,15 @@ namespace Okuyanlar.Web.Controllers
     }
 
     /// <summary>
+    /// Displays the login page.
+    /// </summary>
+    [HttpGet]
+    public IActionResult Login()
+    {
+      return View();
+    }
+
+    /// <summary>
     /// Authenticates the user and establishes a cookie session.
     /// </summary>
     [HttpPost]
