@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Okuyanlar.Core.Enums;
-
+using Microsoft.AspNetCore.Mvc.Rendering;
 namespace Okuyanlar.Web.Models
 {
   /// <summary>
@@ -21,5 +21,7 @@ namespace Okuyanlar.Web.Models
     [Required(ErrorMessage = "Rol seçimi zorunludur.")]
     [Display(Name = "Kullanıcı Rolü")]
     public UserRole Role { get; set; }
+
+    public IEnumerable<SelectListItem>? AllowedRoles { get; set; }
   }
 }

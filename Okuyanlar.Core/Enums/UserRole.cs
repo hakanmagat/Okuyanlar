@@ -6,6 +6,12 @@ namespace Okuyanlar.Core.Enums
   public enum UserRole
   {
     /// <summary>
+    /// Super Administrator. Has full access to the entire system.
+    /// Can manage Admins and Librarians.
+    /// </summary>
+    SystemAdmin = 0,
+
+    /// <summary>
     /// Full system access. Can create Admins and Librarians.
     /// </summary>
     Admin = 1,

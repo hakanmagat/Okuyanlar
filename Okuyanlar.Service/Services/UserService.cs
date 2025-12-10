@@ -51,7 +51,7 @@ namespace Okuyanlar.Service.Services
     // Helper method to centralize permission logic
     private bool CanCreate(UserRole creatorRole, UserRole targetRole)
     {
-      if (creatorRole == UserRole.Admin)
+      if (creatorRole == UserRole.Admin || creatorRole == UserRole.SystemAdmin)
       {
         return targetRole == UserRole.Admin || targetRole == UserRole.Librarian;
       }

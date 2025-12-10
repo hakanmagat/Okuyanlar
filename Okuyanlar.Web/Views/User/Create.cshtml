@@ -1,8 +1,12 @@
-@using Okuyanlar.Core.Enums
+@using System.Security.Claims 
 @model Okuyanlar.Web.Models.CreateUserViewModel
 
 @{
-    ViewData["Title"] = "Yeni Kullanıcı Oluştur";
+    ViewData["Title"] = "Create New User";
+    
+    // Mevcut kullanıcının rolünü Claims üzerinden çekiyoruz
+    var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
+    var currentName = User.Identity?.Name;
 }
 
 <div class="container mt-5">
@@ -10,10 +14,15 @@
         <div class="col-md-6">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="card-title mb-0">Yeni Kullanıcı Oluştur</h3>
+                    <h4 class="mb-0">Create New User</h4>
                 </div>
                 <div class="card-body">
                     
+                    <div class="alert alert-light border shadow-sm mb-4">
+                        <small class="text-muted d-block">Current Operator (You):</small>
+                        <span class="fw-bold text-primary">@currentName</span>
+                        <span class="badge bg-secondary ms-2">@currentRole</span>
+                    </div>
                     @if (TempData["SuccessMessage"] != null)
                     {
                         <div class="alert alert-success">
@@ -26,26 +35,26 @@
 
                         <div class="mb-3">
                             <label asp-for="Username" class="form-label"></label>
-                            <input asp-for="Username" class="form-control" placeholder="örn: ahmet123" />
+                            <input asp-for="Username" class="form-control" />
                             <span asp-validation-for="Username" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Email" class="form-label"></label>
-                            <input asp-for="Email" class="form-control" placeholder="örn: ahmet@mail.com" />
+                            <input asp-for="Email" class="form-control" />
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Role" class="form-label"></label>
-                            <select asp-for="Role" class="form-select" asp-items="Html.GetEnumSelectList<UserRole>()">
-                                <option value="">Bir rol seçiniz...</option>
+                            <select asp-for="Role" asp-items="Model.AllowedRoles" class="form-select">
+                                <option value="">Select a Role...</option>
                             </select>
                             <span asp-validation-for="Role" class="text-danger"></span>
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Kullanıcıyı Oluştur</button>
+                            <button type="submit" class="btn btn-primary">Create User</button>
                         </div>
                     </form>
                 </div>
