@@ -245,5 +245,36 @@ namespace Okuyanlar.Tests
       var exception = Assert.Throws<Exception>(() => _userService.ValidateUser(email, password));
       Assert.Equal("Your account is not active yet.", exception.Message);
     }
+
+    [Fact]
+    public void ValidateUser_Should_ReturnNull_When_UserExists_But_HasNoPasswordHash()
+    {
+      // Arrange
+      var email = "newuser@mail.com";
+      // User exists but password not yet assigned (PasswordHash is empty or null)      
+      var user = new User { Email = email, PasswordHash = null, IsActive = true };
+
+      _mockUserRepository.Setup(x => x.GetByEmail(email)).Returns(user);
+
+      // Act
+      var result = _userService.ValidateUser(email, "anyPassword");
+
+      // Assert
+      Assert.Null(result); // It should return null, not throw an exception.
+    }
+
+    [Fact]
+    public void CreateUser_Should_Succeed_When_SystemAdminCreatesAdmin()
+    {
+      // Arrange
+      var sysAdmin = new User { Role = UserRole.SystemAdmin };
+      var newAdmin = new User { Role = UserRole.Admin, Email = "admin@test.com", Username = "admin" };
+
+      // Act
+      _userService.CreateUser(sysAdmin, newAdmin);
+
+      // Assert
+      _mockUserRepository.Verify(x => x.Add(newAdmin), Times.Once);
+    }
   }
 }

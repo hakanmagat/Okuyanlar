@@ -91,12 +91,23 @@ namespace Okuyanlar.Service.Services
     /// <param name="password">User's plain text password.</param>
     /// <returns>The User entity if validation succeeds; otherwise, null.</returns>
     /// <exception cref="Exception">Thrown if the credentials are correct but the account is not active yet.</exception>
+    /// <summary>
+    /// Validates login credentials by verifying the password hash.
+    /// </summary>
     public User? ValidateUser(string email, string password)
     {
       var user = _userRepository.GetByEmail(email);
 
+      //1. If the user does not exist in the database -> Failed
       if (user == null) return null;
 
+      // If the user exists but the password (PasswordHash) is still NULL or empty -> Failed
+      if (string.IsNullOrEmpty(user.PasswordHash))
+      {
+        return null;
+      }
+
+      // 3. Password Verification (Hasher)
       var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
 
       if (verificationResult == PasswordVerificationResult.Failed)
@@ -104,6 +115,7 @@ namespace Okuyanlar.Service.Services
         return null;
       }
 
+      // 4. Activity Check
       if (!user.IsActive)
       {
         throw new Exception("Your account is not active yet.");

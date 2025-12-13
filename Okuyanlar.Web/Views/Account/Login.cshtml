@@ -1,38 +1,47 @@
 @{
-    ViewData["Title"] = "Giriş Yap";
+    ViewData["Title"] = "Login";
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white text-center">
-                    <h4>Okuyanlar Giriş</h4>
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0"><i class="bi bi-book-half me-2"></i>Okuyanlar Login</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     
                     @if (ViewBag.Error != null)
                     {
-                        <div class="alert alert-danger">
-                            @ViewBag.Error
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-circle me-2"></i>@ViewBag.Error
                         </div>
                     }
 
                     <form asp-action="Login" method="post">
                         <div class="mb-3">
-                            <label class="form-label">E-posta Adresi</label>
-                            <input type="email" name="email" class="form-control" required placeholder="ornek@mail.com" />
+                            <label class="form-label text-muted">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" class="form-control" required placeholder="name@example.com" />
+                            </div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label class="form-label">Şifre</label>
-                            <input type="password" name="password" class="form-control" required placeholder="******" />
+                        <div class="mb-4">
+                            <label class="form-label text-muted">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="password" class="form-control" required placeholder="******" />
+                            </div>
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
                         </div>
                     </form>
+                </div>
+                <div class="card-footer text-center bg-light py-3">
+                    <small class="text-muted">Okuyanlar Library Management System</small>
                 </div>
             </div>
         </div>

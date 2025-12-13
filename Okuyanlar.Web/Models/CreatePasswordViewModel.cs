@@ -12,13 +12,13 @@ namespace Okuyanlar.Web.Models
     /// The security token received via email link. Used to verify the request.
     /// </summary>
     [Required]
-    public string Token { get; set; }
+    public string? Token { get; set; }
 
     /// <summary>
     /// The email address of the user setting the password.
     /// </summary>
     [Required]
-    public string Email { get; set; }
+    public string? Email { get; set; }
 
     /// <summary>
     /// The new password chosen by the user.
@@ -28,7 +28,7 @@ namespace Okuyanlar.Web.Models
     [MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalı.")]
     [Display(Name = "Yeni Şifre")]
     [DataType(DataType.Password)]
-    public string Password { get; set; }
+    public string? Password { get; set; }
 
     /// <summary>
     /// Confirmation field to ensure the user typed the password correctly.
@@ -37,6 +37,6 @@ namespace Okuyanlar.Web.Models
     [Compare("Password", ErrorMessage = "Şifreler eşleşmiyor.")]
     [Display(Name = "Şifre Tekrar")]
     [DataType(DataType.Password)]
-    public string ConfirmPassword { get; set; }
+    public string? ConfirmPassword { get; set; }
   }
 }

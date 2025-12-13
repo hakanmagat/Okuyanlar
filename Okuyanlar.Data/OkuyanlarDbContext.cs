@@ -17,5 +17,10 @@ namespace Okuyanlar.Data
     /// Represents the 'Users' table in the database.
     /// </summary>
     public DbSet<User> Users { get; set; }
+
+    /// <summary>
+    /// Represents the 'Book' table in the database.
+    /// </summary>
+    public DbSet<Book> Books { get; set; }
   }
 }

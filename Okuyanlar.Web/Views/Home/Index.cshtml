@@ -1,8 +1,96 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model IEnumerable<Okuyanlar.Core.Entities.Book>
+
+@{
+    ViewData["Title"] = "Library Inventory";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Library Books</h2>
+        
+        <div class="d-flex align-items-center gap-2">
+            
+            <form asp-controller="Staf" asp-action="Index" method="get" class="d-flex">
+                <input type="text" name="searchTerm" 
+                       class="form-control me-2" 
+                       placeholder="Search by Title or Author..." 
+                       value="@ViewData["CurrentFilter"]" />
+                <button type="submit" class="btn btn-outline-primary">Search</button>
+                
+                @if (ViewData["CurrentFilter"] != null)
+                {
+                    <a asp-action="Index" class="btn btn-link text-decoration-none ms-2">Clear</a>
+                }
+            </form>
+
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+            }
+
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-warning text-center">
+            No books found matching your criteria.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive shadow-sm rounded">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>ISBN</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var book in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@book.Title</td>
+                            <td>@book.Author</td>
+                            <td><small class="text-muted">@book.ISBN</small></td>
+                            <td>
+                                @if(book.Stock > 0)
+                                {
+                                    <span class="badge bg-success">@book.Stock Available</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                }
+                            </td>
+                            <td>
+                                @if (book.IsActive)
+                                {
+                                    <span class="text-success"><i class="bi bi-check-circle-fill"></i> Active</span>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary">Inactive</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>

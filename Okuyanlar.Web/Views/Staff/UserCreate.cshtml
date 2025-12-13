@@ -1,0 +1,75 @@
+@using System.Security.Claims
+@model Okuyanlar.Web.Models.CreateUserViewModel
+
+@{
+    ViewData["Title"] = "Create New Staff/User";
+    var currentOperator = User.Identity?.Name;
+    var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Create New User</h5>
+                    <small class="badge bg-light text-dark">Admin Panel</small>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="alert alert-light border mb-4 d-flex align-items-center">
+                        <i class="bi bi-person-badge fs-3 me-3 text-primary"></i>
+                        <div>
+                            <small class="text-muted d-block">Authorized Operator</small>
+                            <strong>@currentOperator</strong> <span class="badge bg-secondary ms-1">@currentRole</span>
+                        </div>
+                    </div>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="UserCreate" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Username" class="form-label fw-bold"></label>
+                            <input asp-for="Username" class="form-control" placeholder="e.g. library_staff_1" />
+                            <span asp-validation-for="Username" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold"></label>
+                            <input asp-for="Email" class="form-control" placeholder="e.g. staff@okuyanlar.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Role" class="form-label fw-bold"></label>
+                            <select asp-for="Role" asp-items="Model.AllowedRoles" class="form-select">
+                                <option value="">-- Select Role --</option>
+                            </select>
+                            <div class="form-text">Available roles depend on your authorization level.</div>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus-fill me-2"></i> Create User & Send Email
+                            </button>
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Return to Home</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
