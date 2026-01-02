@@ -216,7 +216,7 @@ a {
 }
 
 .ok-form-control {
-    background: var(--ok-surface);
+    background: white;
     border: 1px solid var(--ok-border);
     border-radius: 10px;
     padding: 0.75rem 1rem;
@@ -224,11 +224,12 @@ a {
     width: 100%;
     transition: var(--ok-transition);
     font-size: 1rem;
+    
 }
 
     .ok-form-control:focus {
         outline: none;
-        border-color: var(--ok-accent);
+        border-color: white;
         box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
     }
 
@@ -324,7 +325,11 @@ a {
 
 .ok-badge-accent {
     background: var(--ok-accent);
-    color: var(--ok-stroke);
+    background-color: #2f2215;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), 
+                inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    :
 }
 
 .ok-badge-success {
