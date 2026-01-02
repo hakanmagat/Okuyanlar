@@ -1,6 +1,6 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,71 +12,17 @@
 </head>
 <body>
 
-    <!-- Simple Navbar (partial yoksa bile çalışsın diye inline) -->
-    <nav class="navbar navbar-expand-lg ok-navbar">
-        <div class="container">
-            <a class="navbar-brand ok-brand" asp-controller="Home" asp-action="Index">Okuyanlar</a>
+    @await Html.PartialAsync("Partials/_Navbar")
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#okNavbar"
-                    aria-controls="okNavbar" aria-expanded="false" aria-label="Menü">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="okNavbar">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link ok-nav-link" asp-controller="Home" asp-action="Index">Dashboard</a>
-                    </li>
-                </ul>
-
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                    @if (User?.Identity?.IsAuthenticated == true)
-                    {
-                        <li class="nav-item">
-                            <span class="ok-nav-link">Merhaba, @User.Identity!.Name</span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-ok-primary" asp-controller="Account" asp-action="Logout">Çıkış</a>
-                        </li>
-                    }
-                    else
-                    {
-                        <li class="nav-item">
-                            <a class="btn btn-ok-primary" asp-controller="Account" asp-action="Login">Giriş</a>
-                        </li>
-                    }
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <main class="container ok-container" style="padding-top: 1.25rem; padding-bottom: 2rem;">
+    <main class="ok-shell">
         @RenderBody()
     </main>
 
     <footer class="ok-footer">
-        <div class="container">
-            <small>© @DateTime.Now.Year Okuyanlar • Library Management System</small>
+        <div class="container ok-container">
+            <small>© @DateTime.Now.Year Okuyanlar • Warm Library Theme</small>
         </div>
     </footer>
-
-    <!-- Toast container: OkToast zaten body'e ekliyor ama sabit dursun istersek -->
-    <script>
-        // TempData ile toast yollamak istersen controller'da:
-        // TempData["ToastMessage"]="..."; TempData["ToastType"]="success";
-        window.tempDataMessage = null;
-    </script>
-
-    @if (TempData["ToastMessage"] != null)
-    {
-        <script>
-            window.tempDataMessage = {
-                message: '@TempData["ToastMessage"]',
-                type: '@(TempData["ToastType"] ?? "info")',
-                title: '@(TempData["ToastTitle"] ?? "")'
-            };
-        </script>
-    }
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
