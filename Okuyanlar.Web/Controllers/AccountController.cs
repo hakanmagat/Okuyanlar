@@ -2,143 +2,244 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Okuyanlar.Core.Entities;
-using Okuyanlar.Core.Enums;
 using Okuyanlar.Core.Interfaces;
 using Okuyanlar.Service.Services;
 using Okuyanlar.Web.Models;
+using Okuyanlar.Web.Services;
 using System.Security.Claims;
 
 namespace Okuyanlar.Web.Controllers
 {
-  /// <summary>
-  /// Central controller for all account-related actions:
-  /// Login, Logout, Password Setup, and User Creation.
-  /// </summary>
-  public class AccountController : Controller
-  {
-    private readonly UserService _userService;
-    private readonly IUserRepository _userRepository;
-
-    public AccountController(UserService userService, IUserRepository userRepository)
+    public class AccountController : Controller
     {
-      _userService = userService;
-      _userRepository = userRepository;
-    }
+        private readonly UserService _userService;
+        private readonly IUserRepository _userRepository;
+        private readonly IEmailService _emailService;
+        private readonly IPasswordTokenService _passwordTokenService;
 
-    /// <summary>
-    /// Displays the login page.
-    /// </summary>
-    [HttpGet]
-    public IActionResult Login()
-    {
-      return View();
-    }
-
-    /// <summary>
-    /// Authenticates the user and establishes a cookie session.
-    /// </summary>
-    [HttpPost]
-    public async Task<IActionResult> Login(string email, string password)
-    {
-      try
-      {
-        // 1. Servisten kullanıcıyı doğrula
-        var user = _userService.ValidateUser(email, password);
-
-        if (user == null)
+        public AccountController(
+            UserService userService,
+            IUserRepository userRepository,
+            IEmailService emailService,
+            IPasswordTokenService passwordTokenService)
         {
-          ViewBag.Error = "E-posta veya şifre hatalı.";
-          return View();
+            _userService = userService;
+            _userRepository = userRepository;
+            _emailService = emailService;
+            _passwordTokenService = passwordTokenService;
         }
 
-        // 2. Kimlik Kartı (Claims) Oluştur
-        var claims = new List<Claim>
+        // -------------------- LOGIN --------------------
+        [HttpGet]
+        public IActionResult Login() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> Login(string email, string password)
+        {
+            try
             {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.ToString()) // Rol bazlı yetki için
+                var user = _userService.ValidateUser(email, password);
+
+                if (user == null)
+                {
+                    ViewBag.Error = "E-posta veya şifre hatalı.";
+                    return View();
+                }
+
+                // KVKK zorunluluğu istiyorsan burada da kilitleyebilirsin:
+                // if (!user.KvkkAccepted) { ViewBag.Error = "Devam etmek için KVKK onayı gerekir."; return View(); }
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.Role, user.Role.ToString())
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity));
+
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login");
+        }
+
+        // -------------------- CREATE PASSWORD (ACCOUNT ACTIVATION) --------------------
+        [HttpGet]
+        public IActionResult CreatePassword(string token, string email)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
+                return BadRequest("Invalid link.");
+
+            var model = new CreatePasswordViewModel
+            {
+                Token = token,
+                Email = email
             };
 
-        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-        // 3. Çerezi Tarayıcıya Ver (Giriş Yap)
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-
-        return RedirectToAction("Index", "Home");
-      }
-      catch (Exception ex)
-      {
-        ViewBag.Error = ex.Message;
-        return View();
-      }
-    }
-
-    /// <summary>
-    /// Signs the user out by deleting the authentication cookie.
-    /// </summary>
-    [HttpPost]
-    public async Task<IActionResult> Logout()
-    {
-      await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-      return RedirectToAction("Login");
-    }
-
-    /// <summary>
-    /// Displays the password creation form for users coming from the email link.
-    /// </summary>
-    [HttpGet]
-    public IActionResult CreatePassword(string token, string email)
-    {
-      if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
-      {
-        return BadRequest("Invalid link.");
-      }
-
-      var model = new CreatePasswordViewModel
-      {
-        Token = token,
-        Email = email
-      };
-
-      return View(model);
-    }
-
-    /// <summary>
-    /// Processes the password creation form.
-    /// </summary>    
-    [HttpPost]
-    public IActionResult CreatePassword(CreatePasswordViewModel model)
-    {
-      if (!ModelState.IsValid)
-      {
-        return View(model);
-      }
-
-      try
-      {
-        // Token authentication is in here
-        if (string.IsNullOrEmpty(model.Email))
-        {
-          ModelState.AddModelError("", "Email shouldn't be empty.");
-          return View(model);
+            return View(model);
         }
-        if (string.IsNullOrEmpty(model.Password))
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreatePassword(CreatePasswordViewModel model)
         {
-          ModelState.AddModelError("", "Password shouldn't be empty.");
-          return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
+            {
+                // Şifreyi set et
+                _userService.SetPassword(model.Email, model.Password);
+
+                // KVKK onayını kullanıcıya yaz
+                var user = _userRepository.GetByEmail(model.Email);
+                if (user != null)
+                {
+                    user.KvkkAccepted = true;
+                    user.KvkkAcceptedAt = DateTime.UtcNow;
+                    _userRepository.Update(user);
+                }
+
+                TempData["SuccessMessage"] = "Hesabın aktif edildi. Giriş yapabilirsin.";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(model);
+            }
         }
-        _userService.SetPassword(model.Email, model.Password);
 
-        return RedirectToAction("Login");
-      }
-      catch (Exception ex)
-      {
-        ModelState.AddModelError("", ex.Message);
-        return View(model);
-      }
+        // -------------------- FORGOT / RESET (CODE-BASED) --------------------
+        [HttpGet]
+        public IActionResult ForgotPassword() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ForgotPassword(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ViewBag.Error = "E-posta boş olamaz.";
+                return View();
+            }
+
+            var user = _userRepository.GetByEmail(email);
+
+            // bilgi sızdırmamak için her durumda aynı ekran hissi:
+            if (user == null)
+            {
+                ViewBag.Success = "Eğer bu e-posta kayıtlıysa, şifre sıfırlama kodu gönderildi.";
+                return View();
+            }
+
+            var code = _passwordTokenService.CreateResetToken(email);
+            _emailService.SendPasswordResetLink(email, user.Username, code);
+
+            ViewBag.Success = "Şifre sıfırlama kodu e-posta adresine gönderildi.";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ResetPassword(string email, string code, string newPassword, string confirmPassword)
+        {
+            if (string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(code) ||
+                string.IsNullOrWhiteSpace(newPassword) ||
+                string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                ViewBag.Error = "Tüm alanları doldur.";
+                return View();
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                ViewBag.Error = "Şifreler eşleşmiyor.";
+                return View();
+            }
+
+            if (!_passwordTokenService.ValidateResetToken(email, code))
+            {
+                ViewBag.Error = "Kod geçersiz veya süresi dolmuş.";
+                return View();
+            }
+
+            try
+            {
+                _userService.SetPassword(email, newPassword);
+                _passwordTokenService.ConsumeResetToken(email, code);
+
+                TempData["SuccessMessage"] = "Şifren güncellendi. Giriş yapabilirsin.";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+            }
+        }
+
+        // -------------------- PROFILE (MEMBER AREA) --------------------
+        [Authorize]
+        [HttpGet]
+        public IActionResult Profile()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrWhiteSpace(email))
+                return RedirectToAction("Login");
+
+            var user = _userRepository.GetByEmail(email);
+            if (user == null)
+                return RedirectToAction("Login");
+
+            return View(user);
+        }
+
+        // A (Modal) -> Ajax post
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Form geçersiz.");
+
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized();
+
+            // Mevcut şifre doğru mu?
+            var user = _userService.ValidateUser(email, model.CurrentPassword);
+            if (user == null)
+                return BadRequest("Mevcut şifre yanlış.");
+
+            try
+            {
+                _userService.SetPassword(email, model.NewPassword);
+                return Ok("Parola güncellendi.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
-
-  }
 }

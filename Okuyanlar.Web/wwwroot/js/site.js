@@ -31,7 +31,7 @@ const OkToast = {
                 ${title ? `<div class="ok-toast-title">${title}</div>` : ''}
                 <div class="ok-toast-message">${message}</div>
             </div>
-            <button class="ok-toast-close">×</button>
+            <button class="ok-toast-close" type="button">×</button>
         `;
 
         this.container.appendChild(toast);
@@ -47,7 +47,7 @@ const OkToast = {
     remove(toast) {
         toast.classList.add('removing');
         setTimeout(() => {
-            if (toast.parentNode) {
+            if (toast && toast.parentNode) {
                 toast.parentNode.removeChild(toast);
             }
         }, 300);
@@ -73,21 +73,28 @@ const OkToast = {
 // Modal System
 const OkModal = {
     create(options) {
-        const { title, content, onConfirm, onCancel, confirmText = 'Confirm', cancelText = 'Cancel' } = options;
+        const {
+            title,
+            content,
+            onConfirm,
+            onCancel,
+            confirmText = 'Confirm',
+            cancelText = 'Cancel'
+        } = options;
 
         const overlay = document.createElement('div');
         overlay.className = 'ok-modal-overlay';
 
         overlay.innerHTML = `
-            <div class="ok-modal">
+            <div class="ok-modal" role="dialog" aria-modal="true" aria-label="${title}">
                 <div class="ok-modal-header">
                     <h3 class="ok-modal-title">${title}</h3>
-                    <button class="ok-modal-close" data-action="close">×</button>
+                    <button class="ok-modal-close" data-action="close" type="button" aria-label="Close">×</button>
                 </div>
                 <div class="ok-modal-body">${content}</div>
                 <div class="ok-modal-footer">
-                    ${cancelText ? `<button class="btn-ok-secondary" data-action="cancel">${cancelText}</button>` : ''}
-                    <button class="btn-ok-primary" data-action="confirm">${confirmText}</button>
+                    ${cancelText ? `<button class="btn-ok-secondary" data-action="cancel" type="button">${cancelText}</button>` : ''}
+                    <button class="btn-ok-primary" data-action="confirm" type="button">${confirmText}</button>
                 </div>
             </div>
         `;
@@ -97,24 +104,33 @@ const OkModal = {
         // Animate in
         setTimeout(() => overlay.classList.add('active'), 10);
 
-        // Event handlers
+        // Close on overlay click
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
                 this.close(overlay, onCancel);
             }
         });
 
+        // Actions
         overlay.querySelectorAll('[data-action]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const action = btn.dataset.action;
-                if (action === 'confirm' && onConfirm) {
-                    onConfirm();
-                } else if (action === 'cancel' && onCancel) {
-                    onCancel();
-                }
+
+                if (action === 'confirm' && typeof onConfirm === 'function') onConfirm();
+                if (action === 'cancel' && typeof onCancel === 'function') onCancel();
+
                 this.close(overlay);
             });
         });
+
+        // Escape key closes
+        const onKey = (e) => {
+            if (e.key === 'Escape') {
+                document.removeEventListener('keydown', onKey);
+                this.close(overlay, onCancel);
+            }
+        };
+        document.addEventListener('keydown', onKey);
 
         return overlay;
     },
@@ -122,17 +138,17 @@ const OkModal = {
     close(overlay, callback) {
         overlay.classList.remove('active');
         setTimeout(() => {
-            if (overlay.parentNode) {
+            if (overlay && overlay.parentNode) {
                 overlay.parentNode.removeChild(overlay);
             }
-            if (callback) callback();
+            if (typeof callback === 'function') callback();
         }, 300);
     },
 
     confirm(title, message, onConfirm, onCancel) {
         return this.create({
             title,
-            content: `<p>${message}</p>`,
+            content: `<p style="margin:0;">${message}</p>`,
             onConfirm,
             onCancel,
             confirmText: 'Yes',
@@ -159,7 +175,7 @@ class StarRating {
             const star = document.createElement('span');
             star.className = `ok-star ${i <= this.rating ? 'filled' : ''}`;
             star.textContent = '★';
-            star.dataset.value = i;
+            star.dataset.value = String(i);
 
             if (!this.readonly) {
                 star.addEventListener('click', () => this.setRating(i));
@@ -174,19 +190,14 @@ class StarRating {
     setRating(value) {
         this.rating = value;
         this.highlightStars(value);
-        if (this.onChange) {
-            this.onChange(value);
-        }
+        if (typeof this.onChange === 'function') this.onChange(value);
     }
 
     highlightStars(value) {
         const stars = this.element.querySelectorAll('.ok-star');
         stars.forEach((star, index) => {
-            if (index < value) {
-                star.classList.add('filled');
-            } else {
-                star.classList.remove('filled');
-            }
+            if (index < value) star.classList.add('filled');
+            else star.classList.remove('filled');
         });
     }
 }
@@ -227,9 +238,7 @@ const OkValidation = {
     clearError(input) {
         input.classList.remove('is-invalid');
         const error = input.parentNode.querySelector('.text-danger');
-        if (error) {
-            error.remove();
-        }
+        if (error) error.remove();
     }
 };
 
@@ -258,22 +267,16 @@ const OkLoading = {
 
     hide() {
         const overlay = document.getElementById('ok-loading');
-        if (overlay) {
-            overlay.remove();
-        }
+        if (overlay) overlay.remove();
     }
 };
 
 // Search Debounce
 function debounce(func, wait) {
     let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
+    return function (...args) {
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        timeout = setTimeout(() => func(...args), wait);
     };
 }
 
@@ -288,8 +291,27 @@ document.addEventListener('DOMContentLoaded', function () {
             rating,
             readonly,
             onChange: (value) => {
-                console.log('Rating changed:', value);
-                // Could dispatch custom event here for form handling
+                // optional hook
+                // console.log('Rating changed:', value);
+            }
+        });
+    });
+
+    // Password show/hide toggle (LOGIN / FORGOT / RESET etc.)
+    document.querySelectorAll('[data-toggle-password]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const selector = btn.getAttribute('data-toggle-password');
+            const input = document.querySelector(selector);
+            if (!input) return;
+
+            const icon = btn.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
             }
         });
     });
@@ -300,7 +322,8 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             const message = btn.dataset.confirmDelete || 'Are you sure you want to delete this item?';
             OkModal.confirm('Confirm Delete', message, () => {
-                btn.closest('form')?.submit();
+                const form = btn.closest('form');
+                if (form) form.submit();
             });
         });
     });
@@ -315,13 +338,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Search with debounce
-    const searchInputs = document.querySelectorAll('[data-search-live]');
-    searchInputs.forEach(input => {
-        input.addEventListener('input', debounce((e) => {
+    document.querySelectorAll('[data-search-live]').forEach(input => {
+        input.addEventListener('input', debounce(() => {
             const form = input.closest('form');
-            if (form) {
-                form.submit();
-            }
+            if (form) form.submit();
         }, 500));
     });
 
@@ -332,36 +352,39 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Fade in animations for cards
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
+    const cards = document.querySelectorAll('.ok-card, .ok-book-card, .ok-stat-card');
+    if ('IntersectionObserver' in window && cards.length) {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, index) => {
-            if (entry.isIntersecting) {
-                setTimeout(() => {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }, index * 50);
-                observer.unobserve(entry.target);
-            }
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, index * 50);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s, transform 0.5s';
+            observer.observe(card);
         });
-    }, observerOptions);
+    }
 
-    document.querySelectorAll('.ok-card, .ok-book-card, .ok-stat-card').forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'opacity 0.5s, transform 0.5s';
-        observer.observe(card);
-    });
-
-    // Mobile menu toggle
+    // Mobile menu toggle (Bootstrap collapse helper)
     const navbarToggler = document.querySelector('.navbar-toggler');
     if (navbarToggler) {
         navbarToggler.addEventListener('click', () => {
             const navbar = document.querySelector('.navbar-collapse');
-            navbar.classList.toggle('show');
+            if (navbar) navbar.classList.toggle('show');
         });
     }
 });

@@ -23,12 +23,15 @@ namespace Okuyanlar.Core.Interfaces
     /// </summary>
     /// <returns>The User entity if found; otherwise, null.</returns>
     User? GetByEmail(string email);
+    User? GetById(int id);
+        /// <summary>
+        /// Retrieves a user by their username.
+        /// </summary>
+        /// <returns>The User entity if found; otherwise, null.</returns>
+        User? GetByUsername(string username);
 
-    /// <summary>
-    /// Retrieves a user by their username.
-    /// </summary>
-    /// <returns>The User entity if found; otherwise, null.</returns>
-    User? GetByUsername(string username);
+        IEnumerable<User> GetAll();
 
-  }
+    }
 }
+

@@ -7,7 +7,13 @@ namespace Okuyanlar.Core.Entities
   /// </summary>
   public class Book
   {
-    public int Id { get; set; }
+        public DateTime CreatedAt;
+        public string? CoverUrl { get; set; }
+
+
+        public string Category { get; set; } = string.Empty;
+
+        public int Id { get; set; }
 
     /// <summary>
     /// The title of the book.

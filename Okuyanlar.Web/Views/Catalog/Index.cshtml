@@ -1,0 +1,105 @@
+@model Okuyanlar.Web.Models.CatalogIndexViewModel
+@{
+    ViewData["Title"] = "Catalog";
+}
+
+<div class="ok-container ok-section">
+    <div class="ok-pagehead">
+        <div>
+            <h2 class="ok-pagehead-title">Catalog</h2>
+            <div class="ok-pagehead-sub">Kitapları ara, filtrele, keşfet.</div>
+        </div>
+
+        <div class="ok-pagehead-actions">
+            <a class="btn-ok-secondary" asp-controller="Catalog" asp-action="Top10">
+                <i class="bi bi-trophy me-2"></i>Top 10
+            </a>
+        </div>
+    </div>
+
+    <div class="ok-catalog-toolbar ok-card ok-mt-3">
+        <div class="ok-card-body">
+            <form method="get" class="ok-toolbar-grid">
+                <div class="ok-toolbar-item">
+                    <label class="ok-form-label">Ara</label>
+                    <div class="ok-input-group">
+                        <span class="ok-input-group-text"><i class="bi bi-search"></i></span>
+                        <input name="q" value="@Model.Query" class="ok-form-control" placeholder="Kitap adı, yazar..." />
+                    </div>
+                </div>
+
+                <div class="ok-toolbar-item">
+                    <label class="ok-form-label">Kategori</label>
+                    <select name="category" class="ok-form-control">
+                        <option value="">Tümü</option>
+                        @foreach (var c in Model.Categories)
+                        {
+                            <option value="@c" selected="@(Model.Category == c)">@c</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="ok-toolbar-item">
+                    <label class="ok-form-label">Sırala</label>
+                    <select name="sort" class="ok-form-control">
+                        <option value="title" selected="@(Model.Sort == "title")">A-Z</option>
+                        <option value="new" selected="@(Model.Sort == "new")">Yeni Eklenen</option>
+                        <option value="rating" selected="@(Model.Sort == "rating")">Puan</option>
+                    </select>
+                </div>
+
+                <div class="ok-toolbar-item ok-toolbar-cta">
+                    <button class="btn-ok-primary w-100" type="submit">
+                        Filtrele
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Items == null || Model.Items.Count == 0)
+    {
+        <div class="ok-empty ok-mt-4">
+            <div class="ok-empty-icon"><i class="bi bi-journal-x"></i></div>
+            <div class="ok-empty-title">Sonuç bulunamadı</div>
+            <div class="ok-empty-sub">Arama terimini değiştir veya filtreleri temizle.</div>
+            <a class="btn-ok-secondary ok-mt-2" asp-controller="Catalog" asp-action="Index">Filtreleri sıfırla</a>
+        </div>
+    }
+    else
+    {
+        <div class="ok-grid ok-grid-4 ok-mt-4">
+            @foreach (var item in Model.Items)
+            {
+                <a class="ok-book-card ok-book-link" asp-controller="Books" asp-action="Details" asp-route-id="@item.Id">
+                    <img class="ok-book-cover" src="@item.CoverUrl" alt="@item.Title cover" onerror="this.src='/images/book-placeholder.jpg'" />
+                    <div class="ok-book-body">
+                        <div class="ok-book-title">@item.Title</div>
+                        <div class="ok-book-author">@item.Author</div>
+
+                        <div class="ok-book-meta">
+                            @if (!string.IsNullOrWhiteSpace(item.Category))
+                            {
+                                <span class="ok-badge ok-badge-accent">@item.Category</span>
+                            }
+
+                            @if (item.IsAvailable)
+                            {
+                                <span class="ok-badge ok-badge-success">Available</span>
+                            }
+                            else
+                            {
+                                <span class="ok-badge ok-badge-secondary">Reserved</span>
+                            }
+
+                            <span class="ok-rating">
+                                <i class="bi bi-star-fill"></i>
+                                @item.Rating.ToString("0.0")
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

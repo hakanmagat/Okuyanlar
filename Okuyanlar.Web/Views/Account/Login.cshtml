@@ -1,108 +1,110 @@
 @{
     ViewData["Title"] = "Login";
-    Layout = null; // <-- _AuthLayout yok, tamamen standalone
 }
 
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Okuyanlar</title>
+<div class="ok-auth-container">
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body style="padding-bottom:0;">
+    <!-- LEFT: photo panel -->
+    <section class="ok-auth-visual" aria-label="Okuyanlar visual panel">
+        <div class="ok-auth-content">
 
-    <div class="ok-auth-container">
-        <!-- LEFT VISUAL -->
-        <div class="ok-auth-visual">
-            <div class="ok-auth-content">
-                <div class="ok-auth-logo">Okuyanlar</div>
-                <div class="ok-auth-tagline">Warm Library • Modern Yönetim • Hızlı Katalog</div>
+            <div class="ok-auth-brand">
+                <div class="ok-auth-mark" aria-hidden="true">
+                    <i class="bi bi-book-half"></i>
+                </div>
 
-                <div class="ok-mt-4 ok-flex ok-justify-center ok-gap-2 ok-flex-wrap" style="position:relative; z-index:1;">
-                    <span class="ok-badge ok-badge-accent">Top 10</span>
-                    <span class="ok-badge ok-badge-accent">New Arrivals</span>
-                    <span class="ok-badge ok-badge-accent">Öneriler</span>
-                    <span class="ok-badge ok-badge-accent">Bildirimler</span>
+                <div>
+                    <div class="ok-auth-logo-text">Okuyanlar</div>
+                    <div class="ok-auth-slogan">
+                        Find it fast • Borrow it easy • Read in peace
+                    </div>
                 </div>
             </div>
+
+            <div class="ok-auth-ctas">
+                <a class="ok-auth-pill" asp-controller="Catalog" asp-action="Top10">
+                    <i class="bi bi-trophy"></i> Top 10
+                </a>
+                <a class="ok-auth-pill" asp-controller="Catalog" asp-action="Index">
+                    <i class="bi bi-search"></i> Catalog
+                </a>
+            </div>
+
         </div>
+    </section>
 
-        <!-- RIGHT FORM -->
-        <div class="ok-auth-form-section">
-            <div class="ok-auth-form-wrapper">
-                <div class="ok-auth-form-title">Hoş geldin</div>
-                <p class="ok-auth-form-subtitle">Kütüphane hesabına giriş yap.</p>
+    <!-- RIGHT: form -->
+    <section class="ok-auth-form-section" aria-label="Login form">
+        <div class="ok-auth-form-wrapper">
 
-                @if (ViewBag.Error != null)
-                {
-                    <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
-                        <i class="bi bi-exclamation-circle me-2"></i>
-                        <div>@ViewBag.Error</div>
+            <div class="ok-auth-form-title">Hoş geldin</div>
+            <p class="ok-auth-form-subtitle">Kütüphane hesabına giriş yap.</p>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <div>@ViewBag.Error</div>
+                </div>
+            }
+
+            <form asp-controller="Account" asp-action="Login" method="post" class="ok-flex ok-flex-col ok-gap-2">
+                @Html.AntiForgeryToken()
+
+                <div>
+                    <label class="ok-form-label">E-posta</label>
+                    <div class="ok-input-group">
+                        <span class="ok-input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" name="email" class="ok-form-control" required placeholder="name@example.com" />
                     </div>
-                }
+                </div>
 
-                <form asp-controller="Account" asp-action="Login" method="post" class="ok-flex ok-flex-col ok-gap-2">
-                    @Html.AntiForgeryToken()
+                <div class="ok-mt-2">
+                    <label class="ok-form-label">Şifre</label>
 
-                    <div>
-                        <label class="ok-form-label">E-posta</label>
-                        <div class="ok-input-group">
-                            <span class="ok-input-group-text"><i class="bi bi-envelope"></i></span>
-                            <input type="email" name="email" class="ok-form-control" required placeholder="name@example.com" />
-                        </div>
-                    </div>
+                    <div class="ok-input-group ok-password-group">
+                        <span class="ok-input-group-text"><i class="bi bi-lock"></i></span>
+                        <input id="loginPassword" type="password" name="password" class="ok-form-control" required placeholder="••••••••" />
 
-                    <div class="ok-mt-2">
-                        <label class="ok-form-label">Şifre</label>
-                        <div class="ok-input-group">
-                            <span class="ok-input-group-text"><i class="bi bi-lock"></i></span>
-                            <input type="password" name="password" class="ok-form-control" required placeholder="••••••••" />
-                        </div>
-                    </div>
-
-                    <div class="ok-flex ok-items-center ok-justify-between ok-mt-2">
-                        <div class="ok-form-check">
-                            <input type="checkbox" name="rememberMe" class="ok-form-check-input" id="rememberMe" />
-                            <label class="ok-form-label" for="rememberMe" style="margin:0; cursor:pointer;">
-                                Beni hatırla
-                            </label>
-                        </div>
-
-                        <!-- endpoint yoksa bile link dursun -->
-                        <a asp-controller="Account" asp-action="ForgotPassword" style="font-weight:700;">
-                            Parolamı unuttum
-                        </a>
-                    </div>
-
-                    <div class="ok-mt-3">
-                        <button type="submit" class="btn-ok-primary w-100">
-                            <i class="bi bi-box-arrow-in-right me-2"></i> Giriş Yap
+                        <button type="button"
+                                class="ok-password-toggle"
+                                data-toggle-password="#loginPassword"
+                                aria-label="Parolayı göster/gizle">
+                            <i class="bi bi-eye"></i>
                         </button>
                     </div>
+                </div>
 
-                    <div class="text-center ok-mt-2">
-                        <span class="text-muted">Hesabın yok mu?</span>
-                        <a asp-controller="Account" asp-action="Register" style="font-weight:800; margin-left:.4rem;">
-                            Kayıt ol
-                        </a>
+                <div class="ok-flex ok-items-center ok-justify-between ok-mt-2">
+                    <div class="ok-form-check">
+                        <input type="checkbox" name="rememberMe" class="ok-form-check-input" id="rememberMe" />
+                        <label class="ok-form-label" for="rememberMe" style="margin:0; cursor:pointer;">
+                            Beni hatırla
+                        </label>
                     </div>
 
-                    <div class="text-center ok-mt-3">
-                        <a asp-controller="Home" asp-action="Index" style="font-weight:700; opacity:.8;">
-                            ← Ana sayfaya dön
-                        </a>
-                    </div>
-                </form>
-            </div>
+                    <a class="ok-link-strong" asp-controller="Account" asp-action="ForgotPassword">
+                        Parolamı unuttum
+                    </a>
+                </div>
+
+                <div class="ok-mt-3">
+                    <button type="submit" class="btn-ok-primary w-100">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Giriş Yap
+                    </button>
+                </div>
+
+                <div class="ok-form-foot">
+                    <a asp-controller="Home" asp-action="Index" style="font-weight:900;">
+                        ← Ana sayfaya dön
+                    </a>
+                </div>
+            </form>
+
         </div>
-    </div>
+    </section>
 
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-</body>
-</html>
+</div>
+
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>

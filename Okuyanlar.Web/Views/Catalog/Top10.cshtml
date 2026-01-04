@@ -1,0 +1,69 @@
+﻿@model Okuyanlar.Web.Models.Top10ViewModel
+@{
+    ViewData["Title"] = "Top 10";
+}
+
+<div class="ok-container ok-section">
+    <div class="ok-pagehead">
+        <div>
+            <h2 class="ok-pagehead-title">Top 10</h2>
+            <div class="ok-pagehead-sub">En çok beğenilen 10 kitap.</div>
+        </div>
+
+        <div class="ok-pagehead-actions">
+            <a class="btn-ok-secondary" asp-controller="Catalog" asp-action="Index">
+                <i class="bi bi-arrow-left me-2"></i>Catalog’a dön
+            </a>
+        </div>
+    </div>
+
+    <div class="ok-top10 ok-mt-4">
+        @for (int i = 0; i < (Model.Items?.Count ?? 0); i++)
+        {
+            var item = Model.Items[i];
+            <a class="ok-top10-row ok-card" asp-controller="Books" asp-action="Details" asp-route-id="@item.Id">
+                <div class="ok-top10-rank">#@(i + 1)</div>
+
+                <img class="ok-top10-cover" src="@item.CoverUrl" alt="@item.Title cover"
+                     onerror="this.src='/images/book-placeholder.jpg'" />
+
+                <div class="ok-top10-info">
+                    <div class="ok-top10-title">@item.Title</div>
+                    <div class="ok-top10-sub">@item.Author</div>
+
+                    <div class="ok-top10-meta">
+                        @if (!string.IsNullOrWhiteSpace(item.Category))
+                        {
+                            <span class="ok-badge ok-badge-accent">@item.Category</span>
+                        }
+                        <span class="ok-rating">
+                            <i class="bi bi-star-fill"></i>
+                            @item.Rating.ToString("0.0")
+                        </span>
+                        @if (item.IsAvailable)
+                        {
+                            <span class="ok-badge ok-badge-success">Available</span>
+                        }
+                        else
+                        {
+                            <span class="ok-badge ok-badge-secondary">Reserved</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="ok-top10-cta">
+                    <span class="btn-ok-primary">Details</span>
+                </div>
+            </a>
+        }
+
+        @if (Model.Items == null || Model.Items.Count == 0)
+        {
+            <div class="ok-empty">
+                <div class="ok-empty-icon"><i class="bi bi-trophy"></i></div>
+                <div class="ok-empty-title">Henüz Top 10 yok</div>
+                <div class="ok-empty-sub">Puan verisi oluşunca burada listelenecek.</div>
+            </div>
+        }
+    </div>
+</div>

@@ -44,5 +44,10 @@ namespace Okuyanlar.Core.Entities
     /// The UTC timestamp when the user record was created.
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-  }
+    public bool KvkkAccepted { get; set; } = false;
+    public DateTime? KvkkAcceptedAt { get; set; }
+
+    }
+
+
 }

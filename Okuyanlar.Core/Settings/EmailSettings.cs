@@ -1,12 +1,15 @@
 namespace Okuyanlar.Core.Settings
 {
-  public class EmailSettings
-  {
-    public string SmtpServer { get; set; } = string.Empty;
-    public int Port { get; set; }
-    public string SenderName { get; set; } = string.Empty;
-    public string SenderEmail { get; set; } = string.Empty;
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-  }
+    public class EmailSettings
+    {
+        public string SmtpServer { get; set; } = "";
+        public int Port { get; set; }
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string SenderEmail { get; set; } = "";
+        public string SenderName { get; set; } = "";
+
+        // NEW:
+        public string? BaseUrl { get; set; }
+    }
 }

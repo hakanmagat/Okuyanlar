@@ -12,5 +12,6 @@ namespace Okuyanlar.Core.Interfaces
     /// <param name="username">Recipient's username for personalization.</param>
     /// <param name="token">The unique security token to include in the link.</param>
     void SendPasswordCreationLink(string toEmail, string username, string token);
-  }
+    void SendPasswordResetLink(string toEmail, string username, string token);
+    }
 }

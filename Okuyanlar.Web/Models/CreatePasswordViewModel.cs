@@ -38,5 +38,7 @@ namespace Okuyanlar.Web.Models
     [Display(Name = "Şifre Tekrar")]
     [DataType(DataType.Password)]
     public string? ConfirmPassword { get; set; }
-  }
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Devam etmek için KVKK onayı gerekir.")]
+        public bool KvkkAccepted { get; set; }
+    }
 }
