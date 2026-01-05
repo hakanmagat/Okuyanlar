@@ -161,29 +161,29 @@ namespace Okuyanlar.Web.Controllers
             var currentRole = GetCurrentUserRole() ?? UserRole.EndUser;
             var allowed = _userService.GetCreatableRoles(currentRole);
 
-            if (!Enum.TryParse<UserRole>(model.Role, out var selectedRole) || !allowed.Contains(selectedRole))
+                return BadRequest("You do not have permission for this operation.");
             {
                 ModelState.AddModelError("", "Bu rolü oluşturamazsın.");
-                model.AllowedRoles = allowed.Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            var currentRole = GetCurrentUserRole() ?? UserRole.EndUser;
                 {
                     Text = r.ToString(),
                     Value = r.ToString()
-                }).ToList();
+                return BadRequest("Role selection is invalid.");
                 return View("~/Views/Staff/UserCreate.cshtml", model);
             }
-
+                return BadRequest("You cannot create this role.");
             if (!ModelState.IsValid)
             {
-                model.AllowedRoles = allowed.Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                return BadRequest("Username and email are required.");
                 {
                     Text = r.ToString(),
                     Value = r.ToString()
                 }).ToList();
                 return View("~/Views/Staff/UserCreate.cshtml", model);
             }
-
+                var newUser = new Okuyanlar.Core.Entities.User { Username = model.Username, Email = model.Email, Role = selectedRole };
             var creator = GetCurrentUser();
-            if (creator == null)
+                return Ok("User created. A password creation link has been sent to the email.");
             {
                 ModelState.AddModelError("", "Kullanıcı bulunamadı.");
                 model.AllowedRoles = allowed.Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
