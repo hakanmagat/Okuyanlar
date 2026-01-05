@@ -16,7 +16,7 @@
             </p>
 
             <div class="ok-flex ok-gap-2 ok-justify-center mt-4 ok-flex-wrap">
-                <!-- Catalog controller yoksa bile link dursun; tıklayınca 404 olur ama compile etmez -->
+                <!-- Keep link even if Catalog controller is missing; a click would 404 but it will compile. -->
                 <a asp-controller="Catalog" asp-action="Index" class="btn-ok-primary" style="padding: 1rem 2rem;">
                     <i class="bi bi-search me-2"></i> Browse Catalog
                 </a>

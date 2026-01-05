@@ -18,7 +18,7 @@ namespace Okuyanlar.Tests
     public BookServiceTests()
     {
       _mockBookRepository = new Mock<IBookRepository>();
-      // Servisi henüz yazmadık ama test, bu imzaya sahip olacağını varsayar.
+      // Service not yet implemented, but the test assumes it will expose this signature.
       _bookService = new BookService(_mockBookRepository.Object);
     }
 

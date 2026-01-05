@@ -44,12 +44,12 @@ namespace Okuyanlar.Web.Controllers
 
                 if (user == null)
                 {
-                    ViewBag.Error = "E-posta veya şifre hatalı.";
+                    ViewBag.Error = "Email or password is incorrect.";
                     return View();
                 }
 
-                // KVKK zorunluluğu istiyorsan burada da kilitleyebilirsin:
-                // if (!user.KvkkAccepted) { ViewBag.Error = "Devam etmek için KVKK onayı gerekir."; return View(); }
+                // If you want to enforce KVKK consent here as well, you can lock it:
+                // if (!user.KvkkAccepted) { ViewBag.Error = "KVKK consent is required to continue."; return View(); }
 
                 var claims = new List<Claim>
                 {
@@ -104,10 +104,10 @@ namespace Okuyanlar.Web.Controllers
 
             try
             {
-                // Şifreyi set et
+                // Set the password
                 _userService.SetPassword(model.Email!, model.Password!);
 
-                // KVKK onayını kullanıcıya yaz
+                // Mark KVKK consent on the user
                 var user = _userRepository.GetByEmail(model.Email!);
                 if (user != null)
                 {
@@ -116,7 +116,7 @@ namespace Okuyanlar.Web.Controllers
                     _userRepository.Update(user);
                 }
 
-                TempData["SuccessMessage"] = "Hesabın aktif edildi. Giriş yapabilirsin.";
+                TempData["SuccessMessage"] = "Your account is activated. You can log in.";
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
@@ -136,23 +136,23 @@ namespace Okuyanlar.Web.Controllers
         {
             if (string.IsNullOrWhiteSpace(email))
             {
-                ViewBag.Error = "E-posta boş olamaz.";
+                ViewBag.Error = "Email cannot be empty.";
                 return View();
             }
 
             var user = _userRepository.GetByEmail(email);
 
-            // bilgi sızdırmamak için her durumda aynı ekran hissi:
+            // To avoid information leakage, keep the same response regardless:
             if (user == null)
             {
-                ViewBag.Success = "Eğer bu e-posta kayıtlıysa, şifre sıfırlama kodu gönderildi.";
+                ViewBag.Success = "If this email is registered, a password reset code has been sent.";
                 return View();
             }
 
             var code = _passwordTokenService.CreateResetToken(email);
             _emailService.SendPasswordResetLink(email, user.Username, code);
 
-            ViewBag.Success = "Şifre sıfırlama kodu e-posta adresine gönderildi.";
+            ViewBag.Success = "A password reset code has been sent to the email address.";
             return View();
         }
 
@@ -168,19 +168,19 @@ namespace Okuyanlar.Web.Controllers
                 string.IsNullOrWhiteSpace(newPassword) ||
                 string.IsNullOrWhiteSpace(confirmPassword))
             {
-                ViewBag.Error = "Tüm alanları doldur.";
+                ViewBag.Error = "Fill in all fields.";
                 return View();
             }
 
             if (newPassword != confirmPassword)
             {
-                ViewBag.Error = "Şifreler eşleşmiyor.";
+                ViewBag.Error = "Passwords do not match.";
                 return View();
             }
 
             if (!_passwordTokenService.ValidateResetToken(email, code))
             {
-                ViewBag.Error = "Kod geçersiz veya süresi dolmuş.";
+                ViewBag.Error = "Code is invalid or expired.";
                 return View();
             }
 
@@ -189,7 +189,7 @@ namespace Okuyanlar.Web.Controllers
                 _userService.SetPassword(email!, newPassword!);
                 _passwordTokenService.ConsumeResetToken(email, code);
 
-                TempData["SuccessMessage"] = "Şifren güncellendi. Giriş yapabilirsin.";
+                TempData["SuccessMessage"] = "Your password has been updated. You can log in.";
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
@@ -230,21 +230,21 @@ namespace Okuyanlar.Web.Controllers
         public IActionResult ChangePassword(ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Form geçersiz.");
+                return BadRequest("Invalid form.");
 
             var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrWhiteSpace(email))
                 return Unauthorized();
 
-            // Mevcut şifre doğru mu?
+            // Verify the current password
             var user = _userService.ValidateUser(email, model.CurrentPassword);
             if (user == null)
-                return BadRequest("Mevcut şifre yanlış.");
+                return BadRequest("Current password is incorrect.");
 
             try
             {
                 _userService.SetPassword(email, model.NewPassword);
-                return Ok("Parola güncellendi.");
+                return Ok("Password updated.");
             }
             catch (Exception ex)
             {

@@ -7,7 +7,7 @@
     <div class="ok-pagehead">
         <div>
             <h2 class="ok-pagehead-title">Catalog</h2>
-            <div class="ok-pagehead-sub">Kitapları ara, filtrele, keşfet.</div>
+            <div class="ok-pagehead-sub">Search, filter, and explore books.</div>
         </div>
 
         <div class="ok-pagehead-actions">
@@ -21,17 +21,17 @@
         <div class="ok-card-body">
             <form method="get" class="ok-toolbar-grid">
                 <div class="ok-toolbar-item">
-                    <label class="ok-form-label">Ara</label>
+                    <label class="ok-form-label">Search</label>
                     <div class="ok-input-group">
                         <span class="ok-input-group-text"><i class="bi bi-search"></i></span>
-                        <input name="q" value="@Model.Query" class="ok-form-control" placeholder="Kitap adı, yazar..." />
+                        <input name="q" value="@Model.Query" class="ok-form-control" placeholder="Book title, author..." />
                     </div>
                 </div>
 
                 <div class="ok-toolbar-item">
-                    <label class="ok-form-label">Kategori</label>
+                    <label class="ok-form-label">Category</label>
                     <select name="category" class="ok-form-control">
-                        <option value="">Tümü</option>
+                        <option value="">All</option>
                         @foreach (var c in Model.Categories)
                         {
                             <option value="@c" selected="@(Model.Category == c)">@c</option>
@@ -40,17 +40,17 @@
                 </div>
 
                 <div class="ok-toolbar-item">
-                    <label class="ok-form-label">Sırala</label>
+                    <label class="ok-form-label">Sort</label>
                     <select name="sort" class="ok-form-control">
                         <option value="title" selected="@(Model.Sort == "title")">A-Z</option>
-                        <option value="new" selected="@(Model.Sort == "new")">Yeni Eklenen</option>
-                        <option value="rating" selected="@(Model.Sort == "rating")">Puan</option>
+                        <option value="new" selected="@(Model.Sort == "new")">Newest</option>
+                        <option value="rating" selected="@(Model.Sort == "rating")">Rating</option>
                     </select>
                 </div>
 
                 <div class="ok-toolbar-item ok-toolbar-cta">
                     <button class="btn-ok-primary w-100" type="submit">
-                        Filtrele
+                        Apply Filters
                     </button>
                 </div>
             </form>
@@ -61,9 +61,9 @@
     {
         <div class="ok-empty ok-mt-4">
             <div class="ok-empty-icon"><i class="bi bi-journal-x"></i></div>
-            <div class="ok-empty-title">Sonuç bulunamadı</div>
-            <div class="ok-empty-sub">Arama terimini değiştir veya filtreleri temizle.</div>
-            <a class="btn-ok-secondary ok-mt-2" asp-controller="Catalog" asp-action="Index">Filtreleri sıfırla</a>
+            <div class="ok-empty-title">No results found</div>
+            <div class="ok-empty-sub">Try a different search term or clear filters.</div>
+            <a class="btn-ok-secondary ok-mt-2" asp-controller="Catalog" asp-action="Index">Reset filters</a>
         </div>
     }
     else

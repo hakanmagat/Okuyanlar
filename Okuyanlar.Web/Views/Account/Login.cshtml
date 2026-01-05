@@ -37,8 +37,8 @@
     <section class="ok-auth-form-section" aria-label="Login form">
         <div class="ok-auth-form-wrapper">
 
-            <div class="ok-auth-form-title">Hoş geldin</div>
-            <p class="ok-auth-form-subtitle">Kütüphane hesabına giriş yap.</p>
+            <div class="ok-auth-form-title">Welcome</div>
+            <p class="ok-auth-form-subtitle">Sign in to your library account.</p>
 
             @if (ViewBag.Error != null)
             {
@@ -52,7 +52,7 @@
                 @Html.AntiForgeryToken()
 
                 <div>
-                    <label class="ok-form-label">E-posta</label>
+                    <label class="ok-form-label">Email</label>
                     <div class="ok-input-group">
                         <span class="ok-input-group-text"><i class="bi bi-envelope"></i></span>
                         <input type="email" name="email" class="ok-form-control" required placeholder="name@example.com" />
@@ -60,7 +60,7 @@
                 </div>
 
                 <div class="ok-mt-2">
-                    <label class="ok-form-label">Şifre</label>
+                    <label class="ok-form-label">Password</label>
 
                     <div class="ok-input-group ok-password-group">
                         <span class="ok-input-group-text"><i class="bi bi-lock"></i></span>
@@ -69,7 +69,7 @@
                         <button type="button"
                                 class="ok-password-toggle"
                                 data-toggle-password="#loginPassword"
-                                aria-label="Parolayı göster/gizle">
+                                aria-label="Show or hide password">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -79,24 +79,24 @@
                     <div class="ok-form-check">
                         <input type="checkbox" name="rememberMe" class="ok-form-check-input" id="rememberMe" />
                         <label class="ok-form-label" for="rememberMe" style="margin:0; cursor:pointer;">
-                            Beni hatırla
+                            Remember me
                         </label>
                     </div>
 
                     <a class="ok-link-strong" asp-controller="Account" asp-action="ForgotPassword">
-                        Parolamı unuttum
+                        Forgot password
                     </a>
                 </div>
 
                 <div class="ok-mt-3">
                     <button type="submit" class="btn-ok-primary w-100">
-                        <i class="bi bi-box-arrow-in-right me-2"></i> Giriş Yap
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
                     </button>
                 </div>
 
                 <div class="ok-form-foot">
                     <a asp-controller="Home" asp-action="Index" style="font-weight:900;">
-                        ← Ana sayfaya dön
+                        ← Back to home
                     </a>
                 </div>
             </form>

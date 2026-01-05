@@ -77,29 +77,28 @@ namespace Okuyanlar.Web.Controllers
         public IActionResult UserCreateModal(CreateUserViewModel model)
         {
             if (!CanCreateUser())
-                return BadRequest("Bu işlem için yetkin yok.");
+                return BadRequest("You do not have permission for this operation.");
 
-            // Rol validate: seçilen rol allowed mı?
             var currentRole = GetCurrentUserRole() ?? UserRole.EndUser;
             var allowed = _userService.GetCreatableRoles(currentRole);
 
             if (string.IsNullOrWhiteSpace(model.Role) || !Enum.TryParse<UserRole>(model.Role, out var selectedRole))
-                return BadRequest("Rol seçimi geçersiz.");
+                return BadRequest("Role selection is invalid.");
 
             if (!allowed.Contains(selectedRole))
-                return BadRequest("Bu rolü oluşturamazsın.");
+                return BadRequest("You cannot create this role.");
 
             if (string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Username))
-                return BadRequest("Kullanıcı adı ve e-posta zorunlu.");
+                return BadRequest("Username and email are required.");
 
             try
             {
-                // UserService içinde CreateUser zaten token üretip email atıyorsa onu kullan.
                 var creator = GetCurrentUser();
-                if (creator == null) return BadRequest("Kullanıcı bulunamadı.");
-                var newUser = new Okuyanlar.Core.Entities.User { Username = model.Username, Email = model.Email, Role = selectedRole };
+                if (creator == null) return BadRequest("User not found.");
+
+                var newUser = new User { Username = model.Username, Email = model.Email, Role = selectedRole };
                 _userService.CreateUser(creator, newUser);
-                return Ok("Kullanıcı oluşturuldu. Şifre oluşturma bağlantısı e-postaya gönderildi.");
+                return Ok("User created. A password creation link has been sent to the email.");
             }
             catch (Exception ex)
             {
@@ -114,20 +113,17 @@ namespace Okuyanlar.Web.Controllers
         [HttpGet]
         public IActionResult UserListModal()
         {
-            // Zip’te IUserRepository’de GetAll yoktu; onu ekledik.
             var users = _userRepository.GetAll().ToList();
             return PartialView("~/Views/Staff/_UserListModal.cshtml", users);
         }
 
-        // ---------------------------------------------------
-        // Mevcut full-page CreateUser action’ların kalsın isterse
-        // (senin projende kullanılıyorsa)
-        // ---------------------------------------------------
+        // -------------------------
+        // Full-page Create User (legacy flow)
+        // -------------------------
         [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
         [HttpGet]
         public IActionResult UserCreate()
         {
-            // Eski sayfa akışı lazımsa, rol filtreli şekilde dolduralım:
             var role = GetCurrentUserRole() ?? UserRole.EndUser;
             var allowed = _userService.GetCreatableRoles(role);
 
@@ -150,10 +146,9 @@ namespace Okuyanlar.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CreateUser(CreateUserViewModel model)
         {
-            // Bu aksiyon senin eski akışınsa dokunmadım; sadece rol filtre koydum
             if (!CanCreateUser())
             {
-                ModelState.AddModelError("", "Bu işlem için yetkin yok.");
+                ModelState.AddModelError(string.Empty, "You do not have permission for this operation.");
                 model.AllowedRoles = null;
                 return View("~/Views/Staff/UserCreate.cshtml", model);
             }
@@ -161,31 +156,9 @@ namespace Okuyanlar.Web.Controllers
             var currentRole = GetCurrentUserRole() ?? UserRole.EndUser;
             var allowed = _userService.GetCreatableRoles(currentRole);
 
-                return BadRequest("You do not have permission for this operation.");
+            if (!Enum.TryParse<UserRole>(model.Role, out var selectedRole) || !allowed.Contains(selectedRole))
             {
-                ModelState.AddModelError("", "Bu rolü oluşturamazsın.");
-            var currentRole = GetCurrentUserRole() ?? UserRole.EndUser;
-                {
-                    Text = r.ToString(),
-                    Value = r.ToString()
-                return BadRequest("Role selection is invalid.");
-                return View("~/Views/Staff/UserCreate.cshtml", model);
-            }
-                return BadRequest("You cannot create this role.");
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Username and email are required.");
-                {
-                    Text = r.ToString(),
-                    Value = r.ToString()
-                }).ToList();
-                return View("~/Views/Staff/UserCreate.cshtml", model);
-            }
-                var newUser = new Okuyanlar.Core.Entities.User { Username = model.Username, Email = model.Email, Role = selectedRole };
-            var creator = GetCurrentUser();
-                return Ok("User created. A password creation link has been sent to the email.");
-            {
-                ModelState.AddModelError("", "Kullanıcı bulunamadı.");
+                ModelState.AddModelError(string.Empty, "You cannot create this role.");
                 model.AllowedRoles = allowed.Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
                 {
                     Text = r.ToString(),
@@ -193,7 +166,30 @@ namespace Okuyanlar.Web.Controllers
                 }).ToList();
                 return View("~/Views/Staff/UserCreate.cshtml", model);
             }
-            var newUser = new Okuyanlar.Core.Entities.User { Username = model.Username, Email = model.Email, Role = selectedRole };
+
+            if (!ModelState.IsValid)
+            {
+                model.AllowedRoles = allowed.Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Text = r.ToString(),
+                    Value = r.ToString()
+                }).ToList();
+                return View("~/Views/Staff/UserCreate.cshtml", model);
+            }
+
+            var creator = GetCurrentUser();
+            if (creator == null)
+            {
+                ModelState.AddModelError(string.Empty, "User not found.");
+                model.AllowedRoles = allowed.Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Text = r.ToString(),
+                    Value = r.ToString()
+                }).ToList();
+                return View("~/Views/Staff/UserCreate.cshtml", model);
+            }
+
+            var newUser = new User { Username = model.Username, Email = model.Email, Role = selectedRole };
             _userService.CreateUser(creator, newUser);
             return RedirectToAction("UserCreate");
         }

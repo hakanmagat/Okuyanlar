@@ -73,7 +73,7 @@
                             </div>
 
                             <script>
-                                // Eğer site.js içindeki OkToast kullanıyorsan otomatik toast da basalım:
+                                // If OkToast exists in site.js, also show a toast automatically:
                                 document.addEventListener("DOMContentLoaded", function () {
                                     if (window.OkToast) {
                                         OkToast.success("@TempData["SuccessMessage"]", "Success");
@@ -146,13 +146,13 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // İsteğe bağlı: form submit öncesi mini doğrulama + loading
+        // Optional: mini validation + loading before form submit
         document.addEventListener("DOMContentLoaded", function () {
             var form = document.getElementById("createUserForm");
             if (!form) return;
 
             form.addEventListener("submit", function (e) {
-                // Eğer site.js içindeki OkValidation varsa kullan
+                // Use OkValidation from site.js if present
                 if (window.OkValidation && !OkValidation.validate(form)) {
                     e.preventDefault();
                     if (window.OkToast) OkToast.error("Please check the form fields.", "Validation");

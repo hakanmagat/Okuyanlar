@@ -50,7 +50,7 @@ namespace Okuyanlar.Tests
 
       // Assert - Verify that an InvalidOperationException is thrown (expected for missing SMTP)
       Assert.NotNull(exception);
-      Assert.Contains("E-posta gönderilirken hata oluştu:", exception.Message);
+      Assert.Contains("An error occurred while sending email:", exception.Message);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ namespace Okuyanlar.Tests
 
       // Assert
       Assert.NotNull(exception);
-      Assert.Contains("E-posta gönderilirken hata oluştu:", exception.Message);
+      Assert.Contains("An error occurred while sending email:", exception.Message);
     }
 
     [Fact]
@@ -83,7 +83,7 @@ namespace Okuyanlar.Tests
       var exception = Assert.Throws<InvalidOperationException>(() =>
         _emailService.SendPasswordCreationLink(email, username, token));
 
-      Assert.Contains("E-posta gönderilirken hata oluştu:", exception.Message);
+      Assert.Contains("An error occurred while sending email:", exception.Message);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ namespace Okuyanlar.Tests
       var exception = Assert.Throws<InvalidOperationException>(() =>
         _emailService.SendPasswordResetLink(email, username, token));
 
-      Assert.Contains("E-posta gönderilirken hata oluştu:", exception.Message);
+      Assert.Contains("An error occurred while sending email:", exception.Message);
     }
 
     [Fact]

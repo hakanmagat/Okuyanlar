@@ -17,8 +17,8 @@ namespace Okuyanlar.Web.Controllers
         [HttpGet]
         public IActionResult Index(string? q, string? category, string? sort)
         {
-            // Not: Repo isimleri sende farklı olabilir.
-            // Aşağıdaki satırları repo arayüzüne göre uyarlayacaksın.
+            // Note: Repository names may differ in your implementation.
+            // Adapt the lines below to match your repository interface.
             var books = _bookRepository.GetAll(); // IEnumerable<Book>
 
             if (!string.IsNullOrWhiteSpace(q))

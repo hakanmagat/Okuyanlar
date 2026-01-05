@@ -7,7 +7,7 @@ namespace Okuyanlar.Web.Controllers
 {
     public class BooksController : Controller
     {
-        // Şimdilik demo data (backend'e bağlamadan UI'yı görmek için)
+        // Temporary demo data (to preview UI without backend wired up)
         private static readonly List<Book> DemoBooks = new()
         {
             new Book { Id = 1, Title = "Clean Code", Author = "Robert C. Martin", ISBN = "978-0132350884", Stock = 3, IsActive = true },
@@ -15,7 +15,7 @@ namespace Okuyanlar.Web.Controllers
             new Book { Id = 9, Title = "The Pragmatic Programmer", Author = "Andrew Hunt", ISBN = "978-0201616224", Stock = 1, IsActive = true },
         };
 
-        // /Books veya /Books/Index
+        // /Books or /Books/Index
         public IActionResult Index()
         {
             return View(DemoBooks);

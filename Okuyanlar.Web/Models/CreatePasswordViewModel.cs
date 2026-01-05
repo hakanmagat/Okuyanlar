@@ -24,21 +24,21 @@ namespace Okuyanlar.Web.Models
     /// The new password chosen by the user.
     /// Must be at least 6 characters long.
     /// </summary>
-    [Required(ErrorMessage = "Şifre zorunludur.")]
-    [MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalı.")]
-    [Display(Name = "Yeni Şifre")]
+    [Required(ErrorMessage = "Password is required.")]
+    [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
+    [Display(Name = "New Password")]
     [DataType(DataType.Password)]
     public string? Password { get; set; }
 
     /// <summary>
     /// Confirmation field to ensure the user typed the password correctly.
     /// </summary>
-    [Required(ErrorMessage = "Şifre tekrarı zorunludur.")]
-    [Compare("Password", ErrorMessage = "Şifreler eşleşmiyor.")]
-    [Display(Name = "Şifre Tekrar")]
+    [Required(ErrorMessage = "Password confirmation is required.")]
+    [Compare("Password", ErrorMessage = "Passwords do not match.")]
+    [Display(Name = "Confirm Password")]
     [DataType(DataType.Password)]
     public string? ConfirmPassword { get; set; }
-        [Range(typeof(bool), "true", "true", ErrorMessage = "Devam etmek için KVKK onayı gerekir.")]
-        public bool KvkkAccepted { get; set; }
-    }
+    [Range(typeof(bool), "true", "true", ErrorMessage = "KVKK consent is required to continue.")]
+    public bool KvkkAccepted { get; set; }
+  }
 }

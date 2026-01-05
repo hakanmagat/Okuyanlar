@@ -4,7 +4,7 @@
 @model User
 
 @{
-    ViewData["Title"] = "Profil";
+    ViewData["Title"] = "Profile";
     var role = Model.Role.ToString();
     var allowedRoles = (IEnumerable<string>)(ViewBag.AllowedRoles ?? Enumerable.Empty<string>());
     var canCreateUser = (ViewBag.CanCreateUser as bool?) ?? allowedRoles.Any();
@@ -44,7 +44,7 @@
 
                 <div class="ok-flex ok-gap-2" style="flex-wrap:wrap;">
                     <button type="button" class="btn-ok-accent" id="btnChangePassword">
-                        <i class="bi bi-key-fill me-2"></i> Parola değiştir
+                        <i class="bi bi-key-fill me-2"></i> Change Password
                     </button>
 
                     @if (canCreateUser)
@@ -62,7 +62,7 @@
                     }
 
                     <a class="btn-ok-secondary" asp-controller="Home" asp-action="Index">
-                        <i class="bi bi-house-door me-2"></i> Ana sayfa
+                        <i class="bi bi-house-door me-2"></i> Home
                     </a>
                 </div>
             </div>
@@ -72,11 +72,11 @@
             <div class="ok-grid ok-grid-3">
                 <div class="ok-stat-card">
                     <div class="ok-stat-header">
-                        <div class="ok-stat-title">Aktif ödünç</div>
+                        <div class="ok-stat-title">Active Loans</div>
                         <div class="ok-stat-icon"><i class="bi bi-book"></i></div>
                     </div>
                     <div class="ok-stat-value">0</div>
-                    <div style="opacity:.8; font-weight:600;">Teslim tarihi yaklaşan yok.</div>
+                    <div style="opacity:.8; font-weight:600;">No due dates approaching.</div>
                 </div>
 
                 <div class="ok-stat-card">
@@ -85,16 +85,16 @@
                         <div class="ok-stat-icon"><i class="bi bi-bookmark-heart"></i></div>
                     </div>
                     <div class="ok-stat-value">0</div>
-                    <div style="opacity:.8; font-weight:600;">Sırada bekleyen rezervasyon yok.</div>
+                    <div style="opacity:.8; font-weight:600;">No reservations pending.</div>
                 </div>
 
                 <div class="ok-stat-card">
                     <div class="ok-stat-header">
-                        <div class="ok-stat-title">Bildirimler</div>
+                        <div class="ok-stat-title">Notifications</div>
                         <div class="ok-stat-icon"><i class="bi bi-bell"></i></div>
                     </div>
                     <div class="ok-stat-value">0</div>
-                    <div style="opacity:.8; font-weight:600;">Yeni bildirim yok.</div>
+                    <div style="opacity:.8; font-weight:600;">No new notifications.</div>
                 </div>
             </div>
 
@@ -102,7 +102,7 @@
                 <div class="ok-card">
                     <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;">
                         <i class="bi bi-bag-check-fill"></i>
-                        <span>Benim Kitaplarım / Borrowed Items</span>
+                        <span>My Books / Borrowed Items</span>
                     </div>
                     <div class="ok-card-body">
                         <div style="
@@ -112,7 +112,7 @@
                             background: rgba(243,231,203,.35);
                             font-weight:700;
                             opacity:.85;">
-                            Şu an aktif ödünç yok. Kitap aldığında burada teslim tarihini ve gecikme uyarısını göreceksin.
+                            There are no active loans right now. When you borrow a book, you will see its due date and late notices here.
                         </div>
                     </div>
                 </div>
@@ -120,34 +120,34 @@
                 <div class="ok-card">
                     <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;">
                         <i class="bi bi-bookmark-star-fill"></i>
-                        <span>Listelerim</span>
+                        <span>My Lists</span>
                     </div>
                     <div class="ok-card-body">
                         <div class="ok-flex ok-flex-col ok-gap-2">
                             <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
                                 <div style="font-weight:800;">
-                                    <i class="bi bi-eye me-2"></i> Notify me listesi
+                                    <i class="bi bi-eye me-2"></i> Notify Me list
                                 </div>
                                 <span class="ok-badge ok-badge-secondary">0</span>
                             </div>
 
                             <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
                                 <div style="font-weight:800;">
-                                    <i class="bi bi-bookmark-check me-2"></i> Reserved listesi
+                                    <i class="bi bi-bookmark-check me-2"></i> Reserved list
                                 </div>
                                 <span class="ok-badge ok-badge-secondary">0</span>
                             </div>
 
                             <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
                                 <div style="font-weight:800;">
-                                    <i class="bi bi-journal-bookmark-fill me-2"></i> Okuma listesi
+                                    <i class="bi bi-journal-bookmark-fill me-2"></i> Reading list
                                 </div>
                                 <span class="ok-badge ok-badge-secondary">0</span>
                             </div>
                         </div>
 
                         <div class="text-muted" style="margin-top: .9rem; font-weight:600;">
-                            Not: Bu alanlar backend bağlanınca otomatik dolacak.
+                            Note: These sections will auto-populate once the backend is connected.
                         </div>
                     </div>
                 </div>
@@ -178,7 +178,7 @@
             });
 
             const text = await res.text();
-            if (!res.ok) throw new Error(text || "İşlem başarısız.");
+            if (!res.ok) throw new Error(text || "Operation failed.");
             return text;
         }
 
@@ -189,7 +189,7 @@
                     <input type="hidden" name="__RequestVerificationToken" value="${getAntiForgeryToken()}" />
 
                     <div>
-                        <label class="ok-form-label">Mevcut şifre</label>
+                        <label class="ok-form-label">Current password</label>
                         <div class="ok-input-group">
                             <span class="ok-input-group-text"><i class="bi bi-lock"></i></span>
                             <input class="ok-form-control" type="password" name="CurrentPassword" required />
@@ -197,7 +197,7 @@
                     </div>
 
                     <div class="ok-mt-1">
-                        <label class="ok-form-label">Yeni şifre</label>
+                        <label class="ok-form-label">New password</label>
                         <div class="ok-input-group">
                             <span class="ok-input-group-text"><i class="bi bi-shield-lock"></i></span>
                             <input class="ok-form-control" type="password" name="NewPassword" required minlength="8" />
@@ -205,7 +205,7 @@
                     </div>
 
                     <div class="ok-mt-1">
-                        <label class="ok-form-label">Yeni şifre (tekrar)</label>
+                        <label class="ok-form-label">New password (again)</label>
                         <div class="ok-input-group">
                             <span class="ok-input-group-text"><i class="bi bi-shield-check"></i></span>
                             <input class="ok-form-control" type="password" name="ConfirmNewPassword" required minlength="8" />
@@ -213,22 +213,22 @@
                     </div>
 
                     <div class="text-muted" style="font-weight:600; margin-top:.25rem;">
-                        En az 8 karakter önerilir.
+                        Minimum 8 characters recommended.
                     </div>
                 </form>
             `;
 
             OkModal.create({
-                title: "Parola değiştir",
+                title: "Change Password",
                 content: formHtml,
-                confirmText: "Güncelle",
-                cancelText: "Vazgeç",
+                confirmText: "Update",
+                cancelText: "Cancel",
                 onConfirm: async () => {
                     try {
                         await postForm("@Url.Action("ChangePassword", "Account")", "cpForm");
-                        OkToast.success("Parola güncellendi.", "Başarılı");
+                        OkToast.success("Password updated.", "Success");
                     } catch (e) {
-                        OkToast.error(e.message || "Parola güncellenemedi.", "Hata");
+                        OkToast.error(e.message || "Password could not be updated.", "Error");
                     }
                 }
             });
@@ -237,7 +237,7 @@
         // ---- Create User (roles that are allowed) - Modal A
         document.getElementById("btnCreateUser")?.addEventListener("click", () => {
             if (!allowedRoles || !allowedRoles.length) {
-                OkToast.error("Bu işlem için yetkin yok.", "Hata");
+                OkToast.error("You do not have permission for this action.", "Error");
                 return;
             }
 
@@ -250,7 +250,7 @@
                     <input type="hidden" name="__RequestVerificationToken" value="${getAntiForgeryToken()}" />
 
                     <div>
-                        <label class="ok-form-label">Kullanıcı adı</label>
+                        <label class="ok-form-label">Username</label>
                         <div class="ok-input-group">
                             <span class="ok-input-group-text"><i class="bi bi-person"></i></span>
                             <input class="ok-form-control" name="Username" required />
@@ -258,7 +258,7 @@
                     </div>
 
                     <div class="ok-mt-1">
-                        <label class="ok-form-label">E-posta</label>
+                        <label class="ok-form-label">Email</label>
                         <div class="ok-input-group">
                             <span class="ok-input-group-text"><i class="bi bi-envelope"></i></span>
                             <input class="ok-form-control" type="email" name="Email" required />
@@ -266,29 +266,29 @@
                     </div>
 
                     <div class="ok-mt-1">
-                        <label class="ok-form-label">Rol</label>
+                        <label class="ok-form-label">Role</label>
                         <select class="ok-form-control" name="Role" required>
                             ${roleOptions}
                         </select>
                     </div>
 
                     <div class="text-muted" style="font-weight:600; margin-top:.25rem;">
-                        Kullanıcı oluşturulduktan sonra şifre oluşturma maili gönderilebilir.
+                        After the user is created, a password creation email can be sent.
                     </div>
                 </form>
             `;
 
             OkModal.create({
-                title: "Yeni kullanıcı oluştur",
+                title: "Create new user",
                 content: formHtml,
-                confirmText: "Oluştur",
-                cancelText: "Vazgeç",
+                confirmText: "Create",
+                cancelText: "Cancel",
                 onConfirm: async () => {
                     try {
                         await postForm("@Url.Action("UserCreateModal", "Staff")", "cuForm");
-                        OkToast.success("Kullanıcı oluşturuldu.", "Başarılı");
+                        OkToast.success("User created.", "Success");
                     } catch (e) {
-                        OkToast.error(e.message || "Kullanıcı oluşturulamadı.", "Hata");
+                        OkToast.error(e.message || "User could not be created.", "Error");
                     }
                 }
             });
@@ -302,16 +302,16 @@
                     headers: { "X-Requested-With": "XMLHttpRequest" }
                 });
                 const html = await res.text();
-                if (!res.ok) throw new Error(html || "Liste alınamadı.");
+                if (!res.ok) throw new Error(html || "List could not be retrieved.");
 
                 OkModal.create({
-                    title: "Kullanıcılar",
+                    title: "Users",
                     content: html,
-                    confirmText: "Kapat",
-                    cancelText: "" // cancel butonu istemiyorsan
+                    confirmText: "Close",
+                    cancelText: "" // leave empty if cancel button is not desired
                 });
             } catch (e) {
-                OkToast.error(e.message || "Liste alınamadı.", "Hata");
+                OkToast.error(e.message || "List could not be retrieved.", "Error");
             }
         });
 

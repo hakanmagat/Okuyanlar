@@ -9,17 +9,17 @@ namespace Okuyanlar.Web.Models
   /// </summary>
   public class CreateUserViewModel
   {
-    [Required(ErrorMessage = "Kullanıcı adı zorunludur.")]
-    [Display(Name = "Kullanıcı Adı")]
+    [Required(ErrorMessage = "Username is required.")]
+    [Display(Name = "Username")]
     public string Username { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "E-posta zorunludur.")]
-    [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
-    [Display(Name = "E-posta Adresi")]
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+    [Display(Name = "Email Address")]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Rol seçimi zorunludur.")]
-    [Display(Name = "Kullanıcı Rolü")]
+    [Required(ErrorMessage = "Role selection is required.")]
+    [Display(Name = "User Role")]
     public string Role { get; set; } = string.Empty;
 
     public IEnumerable<SelectListItem>? AllowedRoles { get; set; }

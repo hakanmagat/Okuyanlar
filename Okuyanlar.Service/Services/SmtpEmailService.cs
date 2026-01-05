@@ -19,14 +19,14 @@ namespace Okuyanlar.Service.Services
         {
             var link = $"https://localhost:7214/Account/CreatePassword?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(toEmail)}";
 
-            var subject = "Okuyanlar - Şifre Oluşturma";
+            var subject = "Okuyanlar - Password Creation";
             var body = $@"
-                <h3>Merhaba {username},</h3>
-                <p>Okuyanlar sistemine kaydınız yapıldı.</p>
-                <p>Şifrenizi belirlemek için:</p>
-                <a href='{link}'>Şifremi Oluştur</a>
+                <h3>Hello {username},</h3>
+                <p>Your Okuyanlar account has been created.</p>
+                <p>To set your password:</p>
+                <a href='{link}'>Set My Password</a>
                 <br/><br/>
-                <small>Bu linkin süresi sınırlı olabilir.</small>";
+                <small>This link may expire after a short period.</small>";
 
             SendEmail(toEmail, subject, body);
         }
@@ -35,14 +35,14 @@ namespace Okuyanlar.Service.Services
         {
             var link = $"https://localhost:7214/Account/ResetPassword?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(toEmail)}";
 
-            var subject = "Okuyanlar - Şifre Sıfırlama";
+            var subject = "Okuyanlar - Password Reset";
             var body = $@"
-                <h3>Merhaba {username},</h3>
-                <p>Şifre sıfırlama isteği alındı.</p>
-                <p>Yeni şifre belirlemek için aşağıdaki linke tıklayın:</p>
-                <a href='{link}'>Şifremi Sıfırla</a>
+                <h3>Hello {username},</h3>
+                <p>We received a password reset request.</p>
+                <p>Click the link below to set a new password:</p>
+                <a href='{link}'>Reset My Password</a>
                 <br/><br/>
-                <small>Eğer bu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.</small>";
+                <small>If you did not request this, you can safely ignore this email.</small>";
 
             SendEmail(toEmail, subject, body);
         }
@@ -68,7 +68,7 @@ namespace Okuyanlar.Service.Services
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"E-posta gönderilirken hata oluştu: {ex.Message}");
+                throw new InvalidOperationException($"An error occurred while sending email: {ex.Message}");
             }
         }
     }
