@@ -1,6 +1,88 @@
-﻿@{
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="ok-section" style="padding-top:2.5rem; padding-bottom:2.5rem;">
+    <div class="container ok-container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+
+                <div class="ok-card">
+                    <div class="ok-card-header" style="display:flex; align-items:center; justify-content:space-between;">
+                        <div style="display:flex; align-items:center; gap:.75rem;">
+                            <div style="
+                                width:44px;height:44px;border-radius:12px;
+                                background: rgba(197,160,89,.18);
+                                display:flex;align-items:center;justify-content:center;
+                                border:1px solid rgba(255,255,255,.16);
+                            ">
+                                <i class="bi bi-shield-check" style="font-size:1.2rem; color:#fff;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size:1.15rem; font-weight:900;">Privacy Policy</div>
+                                <div style="opacity:.9; font-weight:700; font-size:.9rem;">
+                                    How Okuyanlar handles your data
+                                </div>
+                            </div>
+                        </div>
+
+                        <span class="ok-badge ok-badge-accent" style="font-weight:900;">KVKK</span>
+                    </div>
+
+                    <div class="ok-card-body">
+                        <h2 style="font-weight:900; margin-bottom:.5rem;">Your Privacy Matters</h2>
+                        <p style="opacity:.85; font-weight:650; margin-bottom:1.5rem;">
+                            Okuyanlar is a library management system. We process only the minimum data required
+                            to run accounts, borrowing/reservations, and notifications—calmly and securely.
+                        </p>
+
+                        <div class="ok-grid ok-grid-2">
+                            <div class="ok-card" style="box-shadow: var(--ok-shadow-sm);">
+                                <div class="ok-card-body">
+                                    <h4 style="font-weight:900; margin-bottom:.5rem;">
+                                        <i class="bi bi-database-lock me-2" style="color:var(--ok-accent);"></i>
+                                        Data We Store
+                                    </h4>
+                                    <ul style="margin:0; padding-left:1.1rem; font-weight:650; opacity:.9;">
+                                        <li>Account identity (email/username)</li>
+                                        <li>Borrowing & reservation records</li>
+                                        <li>Notification preferences</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="ok-card" style="box-shadow: var(--ok-shadow-sm);">
+                                <div class="ok-card-body">
+                                    <h4 style="font-weight:900; margin-bottom:.5rem;">
+                                        <i class="bi bi-bell me-2" style="color:var(--ok-accent);"></i>
+                                        Notifications
+                                    </h4>
+                                    <p style="margin:0; font-weight:650; opacity:.9;">
+                                        If you enable “Notify me when available”, we’ll contact you when the book becomes available.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ok-mt-4 ok-flex ok-gap-2 ok-flex-wrap">
+                            <a class="btn-ok-primary" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-2"></i>Back to Home
+                            </a>
+                            <a class="btn-ok-secondary" asp-controller="Catalog" asp-action="Index">
+                                <i class="bi bi-search me-2"></i>Browse Catalog
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="ok-card-footer">
+                        <small style="opacity:.75; font-weight:800;">
+                            This page can be expanded later with full KVKK / Terms / Rules.
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

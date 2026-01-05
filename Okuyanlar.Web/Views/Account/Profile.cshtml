@@ -1,0 +1,319 @@
+@using Okuyanlar.Core.Entities
+@using System.Linq
+@using System.Text.Json
+@model User
+
+@{
+    ViewData["Title"] = "Profil";
+    var role = Model.Role.ToString();
+    var allowedRoles = (IEnumerable<string>)(ViewBag.AllowedRoles ?? Enumerable.Empty<string>());
+    var canCreateUser = (ViewBag.CanCreateUser as bool?) ?? allowedRoles.Any();
+    var canListUsers = role == "Admin" || role == "SystemAdmin";
+}
+
+<form id="afTokenForm" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+<div class="container" style="max-width: 1100px; padding-top: 2.5rem;">
+    <div class="ok-card">
+        <div class="ok-card-body">
+
+            <div class="ok-flex ok-justify-between ok-items-center" style="gap:1rem; flex-wrap:wrap;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:.75rem;">
+                        <div style="
+                            width:54px; height:54px; border-radius:16px;
+                            background: var(--ok-bg);
+                            border: 1px solid var(--ok-border);
+                            display:flex; align-items:center; justify-content:center;">
+                            <i class="bi bi-person-fill" style="font-size:1.4rem;"></i>
+                        </div>
+
+                        <div>
+                            <div style="font-weight:900; font-size:1.35rem; color: var(--ok-title); line-height:1.1;">
+                                @Model.Username
+                            </div>
+                            <div style="opacity:.75; font-weight:700;">
+                                @Model.Email
+                                <span class="ok-badge ok-badge-secondary" style="margin-left:.5rem;">@role</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ok-flex ok-gap-2" style="flex-wrap:wrap;">
+                    <button type="button" class="btn-ok-accent" id="btnChangePassword">
+                        <i class="bi bi-key-fill me-2"></i> Parola değiştir
+                    </button>
+
+                    @if (canCreateUser)
+                    {
+                        <button type="button" class="btn-ok-secondary" id="btnCreateUser">
+                            <i class="bi bi-person-plus-fill me-2"></i> Create User
+                        </button>
+                    }
+
+                    @if (canListUsers)
+                    {
+                        <button type="button" class="btn-ok-secondary" id="btnListUsers">
+                            <i class="bi bi-people-fill me-2"></i> List Users
+                        </button>
+                    }
+
+                    <a class="btn-ok-secondary" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house-door me-2"></i> Ana sayfa
+                    </a>
+                </div>
+            </div>
+
+            <hr style="border-color: var(--ok-border); margin: 1.5rem 0;" />
+
+            <div class="ok-grid ok-grid-3">
+                <div class="ok-stat-card">
+                    <div class="ok-stat-header">
+                        <div class="ok-stat-title">Aktif ödünç</div>
+                        <div class="ok-stat-icon"><i class="bi bi-book"></i></div>
+                    </div>
+                    <div class="ok-stat-value">0</div>
+                    <div style="opacity:.8; font-weight:600;">Teslim tarihi yaklaşan yok.</div>
+                </div>
+
+                <div class="ok-stat-card">
+                    <div class="ok-stat-header">
+                        <div class="ok-stat-title">Reserved</div>
+                        <div class="ok-stat-icon"><i class="bi bi-bookmark-heart"></i></div>
+                    </div>
+                    <div class="ok-stat-value">0</div>
+                    <div style="opacity:.8; font-weight:600;">Sırada bekleyen rezervasyon yok.</div>
+                </div>
+
+                <div class="ok-stat-card">
+                    <div class="ok-stat-header">
+                        <div class="ok-stat-title">Bildirimler</div>
+                        <div class="ok-stat-icon"><i class="bi bi-bell"></i></div>
+                    </div>
+                    <div class="ok-stat-value">0</div>
+                    <div style="opacity:.8; font-weight:600;">Yeni bildirim yok.</div>
+                </div>
+            </div>
+
+            <div class="ok-mt-4 ok-grid ok-grid-2">
+                <div class="ok-card">
+                    <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;">
+                        <i class="bi bi-bag-check-fill"></i>
+                        <span>Benim Kitaplarım / Borrowed Items</span>
+                    </div>
+                    <div class="ok-card-body">
+                        <div style="
+                            border: 1px dashed rgba(40,29,22,.25);
+                            border-radius: 14px;
+                            padding: 1.25rem;
+                            background: rgba(243,231,203,.35);
+                            font-weight:700;
+                            opacity:.85;">
+                            Şu an aktif ödünç yok. Kitap aldığında burada teslim tarihini ve gecikme uyarısını göreceksin.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ok-card">
+                    <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;">
+                        <i class="bi bi-bookmark-star-fill"></i>
+                        <span>Listelerim</span>
+                    </div>
+                    <div class="ok-card-body">
+                        <div class="ok-flex ok-flex-col ok-gap-2">
+                            <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
+                                <div style="font-weight:800;">
+                                    <i class="bi bi-eye me-2"></i> Notify me listesi
+                                </div>
+                                <span class="ok-badge ok-badge-secondary">0</span>
+                            </div>
+
+                            <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
+                                <div style="font-weight:800;">
+                                    <i class="bi bi-bookmark-check me-2"></i> Reserved listesi
+                                </div>
+                                <span class="ok-badge ok-badge-secondary">0</span>
+                            </div>
+
+                            <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
+                                <div style="font-weight:800;">
+                                    <i class="bi bi-journal-bookmark-fill me-2"></i> Okuma listesi
+                                </div>
+                                <span class="ok-badge ok-badge-secondary">0</span>
+                            </div>
+                        </div>
+
+                        <div class="text-muted" style="margin-top: .9rem; font-weight:600;">
+                            Not: Bu alanlar backend bağlanınca otomatik dolacak.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ---- Helpers
+        const allowedRoles = @Html.Raw(JsonSerializer.Serialize(allowedRoles));
+
+        function getAntiForgeryToken() {
+            const input = document.querySelector('input[name="__RequestVerificationToken"]');
+            return input ? input.value : "";
+        }
+
+        async function postForm(url, formId) {
+            const form = document.getElementById(formId);
+            const fd = new FormData(form);
+
+            const res = await fetch(url, {
+                method: "POST",
+                body: fd,
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            const text = await res.text();
+            if (!res.ok) throw new Error(text || "İşlem başarısız.");
+            return text;
+        }
+
+        // ---- Change Password (Modal A)
+        document.getElementById("btnChangePassword")?.addEventListener("click", () => {
+            const formHtml = `
+                <form id="cpForm" class="ok-flex ok-flex-col ok-gap-2">
+                    <input type="hidden" name="__RequestVerificationToken" value="${getAntiForgeryToken()}" />
+
+                    <div>
+                        <label class="ok-form-label">Mevcut şifre</label>
+                        <div class="ok-input-group">
+                            <span class="ok-input-group-text"><i class="bi bi-lock"></i></span>
+                            <input class="ok-form-control" type="password" name="CurrentPassword" required />
+                        </div>
+                    </div>
+
+                    <div class="ok-mt-1">
+                        <label class="ok-form-label">Yeni şifre</label>
+                        <div class="ok-input-group">
+                            <span class="ok-input-group-text"><i class="bi bi-shield-lock"></i></span>
+                            <input class="ok-form-control" type="password" name="NewPassword" required minlength="8" />
+                        </div>
+                    </div>
+
+                    <div class="ok-mt-1">
+                        <label class="ok-form-label">Yeni şifre (tekrar)</label>
+                        <div class="ok-input-group">
+                            <span class="ok-input-group-text"><i class="bi bi-shield-check"></i></span>
+                            <input class="ok-form-control" type="password" name="ConfirmNewPassword" required minlength="8" />
+                        </div>
+                    </div>
+
+                    <div class="text-muted" style="font-weight:600; margin-top:.25rem;">
+                        En az 8 karakter önerilir.
+                    </div>
+                </form>
+            `;
+
+            OkModal.create({
+                title: "Parola değiştir",
+                content: formHtml,
+                confirmText: "Güncelle",
+                cancelText: "Vazgeç",
+                onConfirm: async () => {
+                    try {
+                        await postForm("@Url.Action("ChangePassword", "Account")", "cpForm");
+                        OkToast.success("Parola güncellendi.", "Başarılı");
+                    } catch (e) {
+                        OkToast.error(e.message || "Parola güncellenemedi.", "Hata");
+                    }
+                }
+            });
+        });
+
+        // ---- Create User (roles that are allowed) - Modal A
+        document.getElementById("btnCreateUser")?.addEventListener("click", () => {
+            if (!allowedRoles || !allowedRoles.length) {
+                OkToast.error("Bu işlem için yetkin yok.", "Hata");
+                return;
+            }
+
+            const roleOptions = allowedRoles
+                .map(r => `<option value="${r}">${r}</option>`)
+                .join("");
+
+            const formHtml = `
+                <form id="cuForm" class="ok-flex ok-flex-col ok-gap-2">
+                    <input type="hidden" name="__RequestVerificationToken" value="${getAntiForgeryToken()}" />
+
+                    <div>
+                        <label class="ok-form-label">Kullanıcı adı</label>
+                        <div class="ok-input-group">
+                            <span class="ok-input-group-text"><i class="bi bi-person"></i></span>
+                            <input class="ok-form-control" name="Username" required />
+                        </div>
+                    </div>
+
+                    <div class="ok-mt-1">
+                        <label class="ok-form-label">E-posta</label>
+                        <div class="ok-input-group">
+                            <span class="ok-input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input class="ok-form-control" type="email" name="Email" required />
+                        </div>
+                    </div>
+
+                    <div class="ok-mt-1">
+                        <label class="ok-form-label">Rol</label>
+                        <select class="ok-form-control" name="Role" required>
+                            ${roleOptions}
+                        </select>
+                    </div>
+
+                    <div class="text-muted" style="font-weight:600; margin-top:.25rem;">
+                        Kullanıcı oluşturulduktan sonra şifre oluşturma maili gönderilebilir.
+                    </div>
+                </form>
+            `;
+
+            OkModal.create({
+                title: "Yeni kullanıcı oluştur",
+                content: formHtml,
+                confirmText: "Oluştur",
+                cancelText: "Vazgeç",
+                onConfirm: async () => {
+                    try {
+                        await postForm("@Url.Action("UserCreateModal", "Staff")", "cuForm");
+                        OkToast.success("Kullanıcı oluşturuldu.", "Başarılı");
+                    } catch (e) {
+                        OkToast.error(e.message || "Kullanıcı oluşturulamadı.", "Hata");
+                    }
+                }
+            });
+        });
+
+        // ---- List Users (Admin/SystemAdmin) - Modal A
+        document.getElementById("btnListUsers")?.addEventListener("click", async () => {
+            try {
+                const res = await fetch("@Url.Action("ListUsers", "Account")", {
+                    method: "GET",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                const html = await res.text();
+                if (!res.ok) throw new Error(html || "Liste alınamadı.");
+
+                OkModal.create({
+                    title: "Kullanıcılar",
+                    content: html,
+                    confirmText: "Kapat",
+                    cancelText: "" // cancel butonu istemiyorsan
+                });
+            } catch (e) {
+                OkToast.error(e.message || "Liste alınamadı.", "Hata");
+            }
+        });
+
+    </script>
+}

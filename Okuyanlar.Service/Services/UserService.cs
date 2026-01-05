@@ -24,6 +24,20 @@ namespace Okuyanlar.Service.Services
     }
 
     /// <summary>
+    /// Returns the list of roles a creator can provision based on the hierarchy.
+    /// </summary>
+    public IReadOnlyCollection<UserRole> GetCreatableRoles(UserRole creatorRole)
+    {
+      return creatorRole switch
+      {
+        UserRole.SystemAdmin => new List<UserRole> { UserRole.Admin },
+        UserRole.Admin => new List<UserRole> { UserRole.Admin, UserRole.Librarian },
+        UserRole.Librarian => new List<UserRole> { UserRole.EndUser },
+        _ => Array.Empty<UserRole>()
+      };
+    }
+
+    /// <summary>
     /// Creates a new user if the requester has the appropriate role permissions.
     /// Also sends an activation email to the new user.
     /// </summary>
@@ -48,20 +62,10 @@ namespace Okuyanlar.Service.Services
       _emailService.SendPasswordCreationLink(newUser.Email, newUser.Username, token);
     }
 
-    // Helper method to centralize permission logic
-    private bool CanCreate(UserRole creatorRole, UserRole targetRole)
+    // Exposed for UI helpers and controllers to share the same rule-set as the service.
+    public bool CanCreate(UserRole creatorRole, UserRole targetRole)
     {
-      if (creatorRole == UserRole.Admin || creatorRole == UserRole.SystemAdmin)
-      {
-        return targetRole == UserRole.Admin || targetRole == UserRole.Librarian;
-      }
-
-      if (creatorRole == UserRole.Librarian)
-      {
-        return targetRole == UserRole.EndUser;
-      }
-
-      return false;
+      return GetCreatableRoles(creatorRole).Contains(targetRole);
     }
 
     /// <summary>

@@ -20,7 +20,7 @@ namespace Okuyanlar.Web.Models
 
     [Required(ErrorMessage = "Rol seçimi zorunludur.")]
     [Display(Name = "Kullanıcı Rolü")]
-    public UserRole Role { get; set; }
+    public string Role { get; set; } = string.Empty;
 
     public IEnumerable<SelectListItem>? AllowedRoles { get; set; }
   }

@@ -251,8 +251,8 @@ namespace Okuyanlar.Tests
     {
       // Arrange
       var email = "newuser@mail.com";
-      // User exists but password not yet assigned (PasswordHash is empty or null)      
-      var user = new User { Email = email, PasswordHash = null, IsActive = true };
+      // User exists but password not yet assigned (PasswordHash is empty)      
+      var user = new User { Email = email, PasswordHash = string.Empty, IsActive = true };
 
       _mockUserRepository.Setup(x => x.GetByEmail(email)).Returns(user);
 
@@ -275,6 +275,53 @@ namespace Okuyanlar.Tests
 
       // Assert
       _mockUserRepository.Verify(x => x.Add(newAdmin), Times.Once);
+    }
+
+    [Fact]
+    public void CreateUser_Should_Throw_When_SystemAdminCreatesLibrarian()
+    {
+      // Arrange
+      var sysAdmin = new User { Role = UserRole.SystemAdmin };
+      var newLibrarian = new User { Role = UserRole.Librarian, Email = "lib@test.com", Username = "lib" };
+
+      // Act & Assert
+      Assert.Throws<UnauthorizedAccessException>(() => _userService.CreateUser(sysAdmin, newLibrarian));
+      _mockUserRepository.Verify(x => x.Add(It.IsAny<User>()), Times.Never);
+    }
+
+    [Fact]
+    public void CreateUser_Should_Throw_When_AdminCreatesSystemAdmin()
+    {
+      // Arrange
+      var admin = new User { Role = UserRole.Admin };
+      var sysAdmin = new User { Role = UserRole.SystemAdmin, Email = "sa@test.com", Username = "sa" };
+
+      // Act & Assert
+      Assert.Throws<UnauthorizedAccessException>(() => _userService.CreateUser(admin, sysAdmin));
+      _mockUserRepository.Verify(x => x.Add(It.IsAny<User>()), Times.Never);
+    }
+
+    [Fact]
+    public void GetCreatableRoles_Should_ReflectHierarchy()
+    {
+      // Act
+      var sysAdminRoles = _userService.GetCreatableRoles(UserRole.SystemAdmin);
+      var adminRoles = _userService.GetCreatableRoles(UserRole.Admin);
+      var librarianRoles = _userService.GetCreatableRoles(UserRole.Librarian);
+      var endUserRoles = _userService.GetCreatableRoles(UserRole.EndUser);
+
+      // Assert
+      Assert.Single(sysAdminRoles);
+      Assert.Contains(UserRole.Admin, sysAdminRoles);
+
+      Assert.Equal(2, adminRoles.Count);
+      Assert.Contains(UserRole.Admin, adminRoles);
+      Assert.Contains(UserRole.Librarian, adminRoles);
+
+      Assert.Single(librarianRoles);
+      Assert.Contains(UserRole.EndUser, librarianRoles);
+
+      Assert.Empty(endUserRoles);
     }
   }
 }

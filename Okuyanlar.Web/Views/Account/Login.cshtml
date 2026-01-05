@@ -2,48 +2,109 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-4">
-            <div class="card shadow border-0">
-                <div class="card-header bg-primary text-white text-center py-3">
-                    <h4 class="mb-0"><i class="bi bi-book-half me-2"></i>Okuyanlar Login</h4>
-                </div>
-                <div class="card-body p-4">
-                    
-                    @if (ViewBag.Error != null)
-                    {
-                        <div class="alert alert-danger" role="alert">
-                            <i class="bi bi-exclamation-circle me-2"></i>@ViewBag.Error
-                        </div>
-                    }
+<div class="ok-auth-container">
 
-                    <form asp-action="Login" method="post">
-                        <div class="mb-3">
-                            <label class="form-label text-muted">Email Address</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                                <input type="email" name="email" class="form-control" required placeholder="name@example.com" />
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="form-label text-muted">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
-                                <input type="password" name="password" class="form-control" required placeholder="******" />
-                            </div>
-                        </div>
+    <!-- LEFT: photo panel -->
+    <section class="ok-auth-visual" aria-label="Okuyanlar visual panel">
+        <div class="ok-auth-content">
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
-                        </div>
-                    </form>
+            <div class="ok-auth-brand">
+                <div class="ok-auth-mark" aria-hidden="true">
+                    <i class="bi bi-book-half"></i>
                 </div>
-                <div class="card-footer text-center bg-light py-3">
-                    <small class="text-muted">Okuyanlar Library Management System</small>
+
+                <div>
+                    <div class="ok-auth-logo-text">Okuyanlar</div>
+                    <div class="ok-auth-slogan">
+                        Find it fast • Borrow it easy • Read in peace
+                    </div>
                 </div>
             </div>
+
+            <div class="ok-auth-ctas">
+                <a class="ok-auth-pill" asp-controller="Catalog" asp-action="Top10">
+                    <i class="bi bi-trophy"></i> Top 10
+                </a>
+                <a class="ok-auth-pill" asp-controller="Catalog" asp-action="Index">
+                    <i class="bi bi-search"></i> Catalog
+                </a>
+            </div>
+
         </div>
-    </div>
+    </section>
+
+    <!-- RIGHT: form -->
+    <section class="ok-auth-form-section" aria-label="Login form">
+        <div class="ok-auth-form-wrapper">
+
+            <div class="ok-auth-form-title">Hoş geldin</div>
+            <p class="ok-auth-form-subtitle">Kütüphane hesabına giriş yap.</p>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <div>@ViewBag.Error</div>
+                </div>
+            }
+
+            <form asp-controller="Account" asp-action="Login" method="post" class="ok-flex ok-flex-col ok-gap-2">
+                @Html.AntiForgeryToken()
+
+                <div>
+                    <label class="ok-form-label">E-posta</label>
+                    <div class="ok-input-group">
+                        <span class="ok-input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" name="email" class="ok-form-control" required placeholder="name@example.com" />
+                    </div>
+                </div>
+
+                <div class="ok-mt-2">
+                    <label class="ok-form-label">Şifre</label>
+
+                    <div class="ok-input-group ok-password-group">
+                        <span class="ok-input-group-text"><i class="bi bi-lock"></i></span>
+                        <input id="loginPassword" type="password" name="password" class="ok-form-control" required placeholder="••••••••" />
+
+                        <button type="button"
+                                class="ok-password-toggle"
+                                data-toggle-password="#loginPassword"
+                                aria-label="Parolayı göster/gizle">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="ok-flex ok-items-center ok-justify-between ok-mt-2">
+                    <div class="ok-form-check">
+                        <input type="checkbox" name="rememberMe" class="ok-form-check-input" id="rememberMe" />
+                        <label class="ok-form-label" for="rememberMe" style="margin:0; cursor:pointer;">
+                            Beni hatırla
+                        </label>
+                    </div>
+
+                    <a class="ok-link-strong" asp-controller="Account" asp-action="ForgotPassword">
+                        Parolamı unuttum
+                    </a>
+                </div>
+
+                <div class="ok-mt-3">
+                    <button type="submit" class="btn-ok-primary w-100">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Giriş Yap
+                    </button>
+                </div>
+
+                <div class="ok-form-foot">
+                    <a asp-controller="Home" asp-action="Index" style="font-weight:900;">
+                        ← Ana sayfaya dön
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </section>
+
 </div>
+
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>

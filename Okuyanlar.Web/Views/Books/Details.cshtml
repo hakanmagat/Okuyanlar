@@ -1,0 +1,98 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model Okuyanlar.Core.Entities.Book
+
+@{
+    ViewData["Title"] = "Book Details";
+}
+
+<div class="ok-section">
+    <div class="container ok-container">
+
+        <div class="row ok-gap-4">
+
+            <!-- LEFT: Cover -->
+            <div class="col-md-4">
+                <div class="ok-card">
+                    <img src="https://via.placeholder.com/400x550?text=No+Cover"
+                         alt="@Model.Title"
+                         class="ok-book-cover"
+                         style="height:550px;" />
+                </div>
+            </div>
+
+            <!-- RIGHT: Details -->
+            <div class="col-md-8">
+                <div class="ok-card">
+                    <div class="ok-card-body">
+
+                        <h1 style="font-weight:900; margin-bottom:.25rem;">
+                            @Model.Title
+                        </h1>
+                        <p style="font-weight:700; opacity:.75;">
+                            by @Model.Author
+                        </p>
+
+                        <div class="ok-mb-3">
+                            <span class="ok-badge ok-badge-accent">ISBN</span>
+                            <span style="font-weight:800; margin-left:.5rem;">
+                                @Model.ISBN
+                            </span>
+                        </div>
+
+                        <!-- Availability Panel -->
+                        <div class="ok-card ok-mt-3" style="box-shadow: var(--ok-shadow-sm);">
+                            <div class="ok-card-body">
+
+                                @if (Model.Stock > 0)
+                                {
+                                    <span class="ok-badge ok-badge-success">Available</span>
+
+                                    <p class="ok-mt-2" style="font-weight:700;">
+                                        This book is currently available for borrowing.
+                                    </p>
+
+                                    <button class="btn-ok-primary ok-mt-2"
+                                            onclick="OkToast.success('Borrow request sent', 'Request')">
+                                        <i class="bi bi-journal-check me-2"></i>
+                                        Borrow Book
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="ok-badge ok-badge-secondary">Unavailable</span>
+
+                                    <p class="ok-mt-2" style="font-weight:700;">
+                                        This book is currently borrowed by another member.
+                                    </p>
+
+                                    <div class="ok-flex ok-gap-2 ok-flex-wrap">
+                                        <button class="btn-ok-primary"
+                                                onclick="OkToast.info('You are added to the reservation list', 'Reserved')">
+                                            <i class="bi bi-clock-history me-2"></i>
+                                            Reserve
+                                        </button>
+
+                                        <button class="btn-ok-secondary"
+                                                onclick="OkToast.info('You will be notified when available', 'Notification')">
+                                            <i class="bi bi-bell me-2"></i>
+                                            Notify Me
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="ok-mt-4">
+                            <a asp-action="Index" class="btn-ok-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Back to Catalog
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
