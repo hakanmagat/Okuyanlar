@@ -9,7 +9,6 @@
 <div class="ok-section">
     <div class="container ok-container">
 
-        <!-- Page Header -->
         <div class="ok-flex ok-items-center ok-justify-between ok-mb-4 ok-flex-wrap ok-gap-2">
             <h1 style="font-weight:900;">
                 <i class="bi bi-star-fill me-2" style="color:var(--ok-accent);"></i>
@@ -24,13 +23,12 @@
 
         @if (Model != null && Model.Any())
         {
-            <!-- Ranked List View -->
             <div class="ok-table-responsive">
                 <table class="ok-table">
                     <thead>
                         <tr>
-                            <th style="width: 5%;">Rank</th>
-                            <th style="width: 40%;">Title</th>
+                            <th style="width: 10%;">Rank</th>
+                            <th style="width: 35%;">Title</th>
                             <th style="width: 25%;">Author</th>
                             <th style="width: 15%;">Rating</th>
                             <th style="width: 15%;">Reviews</th>
@@ -44,19 +42,7 @@
                         {
                             <tr>
                                 <td>
-                                    <span class="ok-badge ok-badge-accent">
-                                        @if (rank == 1)
-                                        {
-                                            <i class="bi bi-1-circle-fill me-1"></i>
-                                        }
-                                        else if (rank == 2)
-                                        {
-                                            <i class="bi bi-2-circle-fill me-1"></i>
-                                        }
-                                        else if (rank == 3)
-                                        {
-                                            <i class="bi bi-3-circle-fill me-1"></i>
-                                        }
+                                    <span class="ok-badge ok-badge-accent" style="min-width: 45px; text-align: center;">
                                         #@rank
                                     </span>
                                 </td>
@@ -96,7 +82,6 @@
                 </table>
             </div>
 
-            <!-- Card Grid View -->
             <div style="margin-top: 40px;">
                 <h3 style="margin-bottom: 20px;">Featured Books</h3>
                 <div class="ok-grid ok-grid-3">
@@ -107,26 +92,12 @@
                     {
                         <div class="ok-book-card" style="border: 2px solid var(--ok-accent); position: relative;">
                             <div style="position: absolute; top: 10px; right: 10px; z-index: 10;">
-                                <span class="ok-badge ok-badge-accent" style="font-size: 16px; padding: 8px 12px;">
-                                    @if (rank == 1)
-                                    {
-                                        <i class="bi bi-1-circle-fill me-1"></i>
-                                        <span>1st</span>
-                                    }
-                                    else if (rank == 2)
-                                    {
-                                        <i class="bi bi-2-circle-fill me-1"></i>
-                                        <span>2nd</span>
-                                    }
-                                    else if (rank == 3)
-                                    {
-                                        <i class="bi bi-3-circle-fill me-1"></i>
-                                        <span>3rd</span>
-                                    }
+                                <span class="ok-badge ok-badge-accent" style="font-size: 14px; padding: 6px 12px; font-weight: 900;">
+                                    #@rank
                                 </span>
                             </div>
 
-                            <img src="https://via.placeholder.com/300x400?text=@book.Title.Replace(" ", "+")&chl=rand"
+                            <img src="https://via.placeholder.com/300x400?text=@book.Title.Replace(" ", "+")"
                                  alt="@book.Title"
                                  class="ok-book-cover" />
 
@@ -153,7 +124,7 @@
                                         }
                                         <span style="margin-left: 5px; font-weight: 600;">@book.Rating.ToString("F1")</span>
                                     </div>
-                                    <small style="color: #666;">@book.RatingCount @(book.RatingCount == 1 ? "review" : "reviews")</small>
+                                    <small style="color: #666;">@book.RatingCount reviews</small>
                                 </div>
 
                                 @if (book.Stock > 0)
@@ -168,7 +139,7 @@
                                 <a asp-controller="Books"
                                    asp-action="Details"
                                    asp-route-id="@book.Id"
-                                   class="ok-button ok-button-sm ok-mt-2">
+                                   class="btn-ok-primary ok-mt-2" style="font-size: 0.9rem; text-align: center;">
                                     View Details
                                 </a>
                             </div>
@@ -186,53 +157,11 @@
             </div>
         }
 
-        <!-- Navigation -->
         <div style="margin-top: 40px; text-align: center;">
-            <a asp-controller="Books" asp-action="Index" class="ok-button ok-button-secondary">
+            <a asp-controller="Books" asp-action="Index" class="btn-ok-secondary">
                 <i class="bi bi-arrow-left me-2"></i>
                 Back to Catalog
             </a>
         </div>
     </div>
 </div>
-
-<style>
-    .ok-table {
-        width: 100%;
-        border-collapse: collapse;
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .ok-table thead {
-        background: var(--ok-accent);
-        color: white;
-    }
-
-    .ok-table th, .ok-table td {
-        padding: 16px;
-        text-align: left;
-    }
-
-    .ok-table tbody tr {
-        border-bottom: 1px solid #eee;
-        transition: background-color 0.2s;
-    }
-
-    .ok-table tbody tr:hover {
-        background-color: #f9f9f9;
-    }
-
-    .ok-table-responsive {
-        overflow-x: auto;
-    }
-
-    @@media only screen and (max-width: 768px) {
-        .ok-table th, .ok-table td {
-            padding: 12px;
-            font-size: 14px;
-        }
-    }
-</style>
