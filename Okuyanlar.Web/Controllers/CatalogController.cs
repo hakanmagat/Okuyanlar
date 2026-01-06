@@ -57,6 +57,8 @@ namespace Okuyanlar.Web.Controllers
                     Category = b.Category ?? "",
                     CoverUrl = string.IsNullOrWhiteSpace(b.CoverUrl) ? "/images/book-placeholder.jpg" : b.CoverUrl!,
                     IsAvailable = b.Stock > 0,
+                    ISBN = b.ISBN ?? "",
+                    Stock = b.Stock,
                 }).ToList()
             };
 
@@ -88,6 +90,8 @@ namespace Okuyanlar.Web.Controllers
                     Category = b.Category ?? "",
                     CoverUrl = string.IsNullOrWhiteSpace(b.CoverUrl) ? "/images/book-placeholder.jpg" : b.CoverUrl!,
                     IsAvailable = b.Stock > 0,
+                    ISBN = b.ISBN ?? "",
+                    Stock = b.Stock,
                 })
                 .ToList();
 

@@ -68,37 +68,106 @@
     }
     else
     {
-        <div class="ok-grid ok-grid-4 ok-mt-4">
+        <div class="ok-mt-4">
             @foreach (var item in Model.Items)
             {
-                <a class="ok-book-card ok-book-link" asp-controller="Books" asp-action="Details" asp-route-id="@item.Id">
-                    <img class="ok-book-cover" src="@item.CoverUrl" alt="@item.Title cover" onerror="this.src='/images/book-placeholder.jpg'" />
-                    <div class="ok-book-body">
-                        <div class="ok-book-title">@item.Title</div>
-                        <div class="ok-book-author">@item.Author</div>
+                <div class="ok-card ok-mb-4">
+                    <div class="ok-card-body">
+                        <div class="ok-flex ok-gap-4 ok-flex-wrap" style="align-items: flex-start;">
+                            <!-- Book Cover -->
+                            <div style="flex: 0 0 200px; max-width: 100%;">
+                                <img src="@item.CoverUrl" 
+                                     alt="@item.Title cover" 
+                                     class="ok-book-cover" 
+                                     style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px;"
+                                     onerror="this.src='/images/book-placeholder.jpg'" />
+                            </div>
 
-                        <div class="ok-book-meta">
-                            @if (!string.IsNullOrWhiteSpace(item.Category))
-                            {
-                                <span class="ok-badge ok-badge-accent">@item.Category</span>
-                            }
+                            <!-- Book Details -->
+                            <div style="flex: 1; min-width: 300px;">
+                                <h3 style="font-weight: 900; margin-bottom: 0.25rem; font-size: 1.75rem; color: var(--ok-title);">
+                                    @item.Title
+                                </h3>
+                                <p style="font-weight: 700; opacity: 0.75; font-size: 1.1rem; margin-bottom: 1rem;">
+                                    by @item.Author
+                                </p>
 
-                            @if (item.IsAvailable)
-                            {
-                                <span class="ok-badge ok-badge-success">Available</span>
-                            }
-                            else
-                            {
-                                <span class="ok-badge ok-badge-secondary">Reserved</span>
-                            }
+                                <div class="ok-book-meta ok-mb-3">
+                                    @if (!string.IsNullOrWhiteSpace(item.Category))
+                                    {
+                                        <span class="ok-badge ok-badge-accent">@item.Category</span>
+                                    }
 
-                            <span class="ok-rating">
-                                <i class="bi bi-star-fill"></i>
-                                @item.Rating.ToString("0.0")
-                            </span>
+                                    @if (item.IsAvailable)
+                                    {
+                                        <span class="ok-badge ok-badge-success">Available</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="ok-badge ok-badge-secondary">Reserved</span>
+                                    }
+
+                                    <span class="ok-rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        @item.Rating.ToString("0.0")
+                                    </span>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(item.ISBN))
+                                {
+                                    <div class="ok-mb-3">
+                                        <span class="ok-badge ok-badge-accent">ISBN</span>
+                                        <span style="font-weight: 700; margin-left: 0.5rem; color: var(--ok-title);">
+                                            @item.ISBN
+                                        </span>
+                                    </div>
+                                }
+
+                                <hr style="border: 0; border-top: 1px solid var(--ok-border); margin: 1rem 0;">
+
+                                <!-- Action Section -->
+                                <div class="ok-card ok-mt-3" style="box-shadow: var(--ok-shadow-sm); background: rgba(0,0,0,0.02);">
+                                    <div class="ok-card-body">
+                                        @if (item.Stock > 0)
+                                        {
+                                            <p style="font-weight: 700; color: var(--ok-text); margin-bottom: 0.75rem;">
+                                                <i class="bi bi-check-circle-fill me-2" style="color: var(--ok-success);"></i>
+                                                This book is currently available for borrowing. (@item.Stock in stock)
+                                            </p>
+
+                                            <button class="btn-ok-primary"
+                                                    onclick="OkToast.success('Borrow request sent', 'Request')">
+                                                <i class="bi bi-journal-check me-2"></i>
+                                                Borrow Book
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <p style="font-weight: 700; color: var(--ok-text); margin-bottom: 0.75rem;">
+                                                <i class="bi bi-x-circle-fill me-2" style="color: var(--ok-secondary);"></i>
+                                                This book is currently borrowed by another member.
+                                            </p>
+
+                                            <div class="ok-flex ok-gap-2 ok-flex-wrap">
+                                                <button class="btn-ok-primary"
+                                                        onclick="OkToast.info('You are added to the reservation list', 'Reserved')">
+                                                    <i class="bi bi-clock-history me-2"></i>
+                                                    Reserve
+                                                </button>
+
+                                                <button class="btn-ok-secondary"
+                                                        onclick="OkToast.info('You will be notified when available', 'Notification')">
+                                                    <i class="bi bi-bell me-2"></i>
+                                                    Notify Me
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </a>
+                </div>
             }
         </div>
     }

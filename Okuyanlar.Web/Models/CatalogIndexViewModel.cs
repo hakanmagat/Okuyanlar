@@ -9,6 +9,8 @@ namespace Okuyanlar.Web.Models
         public string CoverUrl { get; set; } = "/images/book-placeholder.jpg";
         public double Rating { get; set; }
         public bool IsAvailable { get; set; }
+        public string ISBN { get; set; } = "";
+        public int Stock { get; set; }
     }
 
     public class CatalogIndexViewModel
