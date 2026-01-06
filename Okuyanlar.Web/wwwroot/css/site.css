@@ -932,7 +932,7 @@ a {
 
 /* =========================
    AUTH (Login/CreatePassword/Forgot/Reset) - SINGLE, CLEAN BLOCK
-   Tema bozulmasýn diye tek yerde toplandý.
+   Tema bozulmasï¿½n diye tek yerde toplandï¿½.
    ========================= */
 
 .ok-auth-container {
@@ -1344,4 +1344,20 @@ a {
     .ok-top10-cta {
         display: none;
     }
+}
+.ok-nav-btn {
+    padding: 0.5rem 1.25rem !important; 
+    font-size: 0.95rem;
+    border-radius: 8px !important; 
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+}
+
+.navbar-nav form {
+    display: flex;
+    align-items: center;
+    margin: 0;
 }
