@@ -1,5 +1,6 @@
 # Okuyanlar - Library Management System
 
+...
 
 ## Project Overview
 Okuyanlar is a Library Management System developed with a strong emphasis on **Clean Architecture** principles and a **Test-Driven Development (TDD)** approach. The project is designed to be modular, scalable, and maintainable, adhering to strict separation of concerns.
