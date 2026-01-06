@@ -41,11 +41,18 @@ namespace Okuyanlar.Web.Controllers
 
         // POST /Books/Rate
         [HttpPost]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "EndUser")]
         public IActionResult Rate(int bookId, decimal rating)
         {
             try
             {
-                _bookService.RateBook(bookId, rating);
+                var email = User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    return Unauthorized(new { success = false, message = "Login required." });
+                }
+
+                _bookService.RateBook(bookId, email, rating);
                 return Ok(new { success = true, message = "Book rated successfully." });
             }
             catch (Exception ex)

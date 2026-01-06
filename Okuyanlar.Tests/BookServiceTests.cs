@@ -3,6 +3,7 @@ using Xunit;
 using Okuyanlar.Core.Entities;
 using Okuyanlar.Core.Interfaces;
 using Okuyanlar.Service.Services;
+using Okuyanlar.Core.Enums;
 
 namespace Okuyanlar.Tests
 {
@@ -13,12 +14,16 @@ namespace Okuyanlar.Tests
   public class BookServiceTests
   {
     private readonly Mock<IBookRepository> _mockBookRepository;
+    private readonly Mock<IBookRatingRepository> _mockBookRatingRepository;
+    private readonly Mock<IUserRepository> _mockUserRepository;
     private readonly BookService _bookService;
 
     public BookServiceTests()
     {
       _mockBookRepository = new Mock<IBookRepository>();
-      // Service not yet implemented, but the test assumes it will expose this signature.
+      _mockBookRatingRepository = new Mock<IBookRatingRepository>();
+      _mockUserRepository = new Mock<IUserRepository>();
+      // Default service for non-rating tests
       _bookService = new BookService(_mockBookRepository.Object);
     }
 
@@ -254,28 +259,44 @@ namespace Okuyanlar.Tests
     public void RateBook_Should_UpdateAverage_When_ValidRating()
     {
       // Arrange
+      var email = "user@okuyanlar.oku";
+      var user = new User { Id = 123, Email = email, Role = UserRole.EndUser };
       var book = new Book { Id = 1, Rating = 0m, RatingCount = 0 };
+
+      var ratings = new List<BookRating>();
+
       _mockBookRepository.Setup(x => x.GetById(book.Id)).Returns(book);
+      _mockUserRepository.Setup(x => x.GetByEmail(email)).Returns(user);
+      _mockBookRatingRepository.Setup(x => x.GetByBookAndUser(book.Id, user.Id))
+        .Returns(() => ratings.FirstOrDefault(r => r.BookId == book.Id && r.UserId == user.Id));
+      _mockBookRatingRepository.Setup(x => x.Add(It.IsAny<BookRating>()))
+        .Callback<BookRating>(r => { r.Id = ratings.Count + 1; ratings.Add(r); });
+      _mockBookRatingRepository.Setup(x => x.Update(It.IsAny<BookRating>()))
+        .Callback<BookRating>(r => {
+          var idx = ratings.FindIndex(x => x.Id == r.Id);
+          if (idx >= 0) ratings[idx] = r;
+        });
+      _mockBookRatingRepository.Setup(x => x.GetRatingsForBook(book.Id))
+        .Returns(() => ratings.ToList());
+
+      var svc = new BookService(_mockBookRepository.Object, _mockBookRatingRepository.Object, _mockUserRepository.Object);
 
       // Act - first rating 4
-      _bookService.RateBook(book.Id, 4m);
+      svc.RateBook(book.Id, email, 4m);
 
       // Assert - first update
       Assert.Equal(1, book.RatingCount);
       Assert.Equal(4m, book.Rating);
       _mockBookRepository.Verify(x => x.Update(It.Is<Book>(b => b.RatingCount == 1 && b.Rating == 4m)), Times.Once);
 
-      // Arrange for second rating: repository returns the same mutated book
+      // Act - second rating 2 (update same user's rating)
       _mockBookRepository.Invocations.Clear();
-      _mockBookRepository.Setup(x => x.GetById(book.Id)).Returns(book);
+      svc.RateBook(book.Id, email, 2m);
 
-      // Act - second rating 2
-      _bookService.RateBook(book.Id, 2m);
-
-      // Assert - average (4 + 2) / 2 = 3
-      Assert.Equal(2, book.RatingCount);
-      Assert.Equal(3m, book.Rating);
-      _mockBookRepository.Verify(x => x.Update(It.Is<Book>(b => b.RatingCount == 2 && b.Rating == 3m)), Times.Once);
+      // Assert - average (2) across one rating remains 2 after update by same user
+      Assert.Equal(1, book.RatingCount);
+      Assert.Equal(2m, book.Rating);
+      _mockBookRepository.Verify(x => x.Update(It.Is<Book>(b => b.RatingCount == 1 && b.Rating == 2m)), Times.Once);
     }
 
     [Theory]
@@ -285,9 +306,10 @@ namespace Okuyanlar.Tests
     {
       // Arrange
       var bookId = 1;
+      var email = "user@okuyanlar.oku";
 
       // Act & Assert
-      var ex = Assert.Throws<ArgumentException>(() => _bookService.RateBook(bookId, rating));
+      var ex = Assert.Throws<ArgumentException>(() => _bookService.RateBook(bookId, email, rating));
       Assert.Equal("Rating must be between 0 and 5.", ex.Message);
       _mockBookRepository.Verify(x => x.Update(It.IsAny<Book>()), Times.Never);
     }

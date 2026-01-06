@@ -9,10 +9,22 @@ namespace Okuyanlar.Service.Services
   public class BookService
   {
     private readonly IBookRepository _bookRepository;
+    private readonly IBookRatingRepository? _bookRatingRepository;
+    private readonly IUserRepository? _userRepository;
 
+    public BookService(IBookRepository bookRepository, IBookRatingRepository bookRatingRepository, IUserRepository userRepository)
+    {
+      _bookRepository = bookRepository;
+      _bookRatingRepository = bookRatingRepository;
+      _userRepository = userRepository;
+    }
+
+    // Backward-compatible constructor for tests/other usages not needing ratings.
     public BookService(IBookRepository bookRepository)
     {
       _bookRepository = bookRepository;
+      _bookRatingRepository = null;
+      _userRepository = null;
     }
 
     /// <summary>
@@ -110,7 +122,12 @@ namespace Okuyanlar.Service.Services
     /// <param name="bookId">The ID of the book to rate.</param>
     /// <param name="ratingValue">The rating value (typically 1-5).</param>
     /// <exception cref="Exception">Thrown if book not found.</exception>
-    public void RateBook(int bookId, decimal ratingValue)
+    /// <summary>
+    /// Adds or updates a rating for a book by a specific user.
+    /// Enforces: user must exist, be EndUser, and can rate a book only once (but may update).
+    /// Updates the aggregate book rating and count after save.
+    /// </summary>
+    public void RateBook(int bookId, string userEmail, decimal ratingValue)
     {
       if (ratingValue < 0 || ratingValue > 5)
       {
@@ -123,11 +140,50 @@ namespace Okuyanlar.Service.Services
         throw new Exception("Book not found.");
       }
 
-      // Calculate new average rating
-      decimal totalRating = (book.Rating * book.RatingCount) + ratingValue;
-      book.RatingCount++;
-      book.Rating = totalRating / book.RatingCount;
+      if (string.IsNullOrWhiteSpace(userEmail))
+      {
+        throw new UnauthorizedAccessException("User must be logged in.");
+      }
 
+      if (_userRepository == null || _bookRatingRepository == null)
+      {
+        throw new InvalidOperationException("Rating feature is not configured.");
+      }
+
+      var user = _userRepository.GetByEmail(userEmail);
+      if (user == null)
+      {
+        throw new UnauthorizedAccessException("User not found.");
+      }
+      if (user.Role != Okuyanlar.Core.Enums.UserRole.EndUser)
+      {
+        throw new UnauthorizedAccessException("Only end users can rate books.");
+      }
+
+      var existing = _bookRatingRepository.GetByBookAndUser(bookId, user.Id);
+      if (existing == null)
+      {
+        var newRating = new BookRating
+        {
+          BookId = bookId,
+          UserId = user.Id,
+          Rating = ratingValue,
+          CreatedAt = DateTime.UtcNow,
+          UpdatedAt = DateTime.UtcNow
+        };
+        _bookRatingRepository.Add(newRating);
+      }
+      else
+      {
+        existing.Rating = ratingValue;
+        existing.UpdatedAt = DateTime.UtcNow;
+        _bookRatingRepository.Update(existing);
+      }
+
+      // Recompute aggregate
+      var ratings = _bookRatingRepository.GetRatingsForBook(bookId).ToList();
+      book.RatingCount = ratings.Count;
+      book.Rating = ratings.Count == 0 ? 0 : ratings.Average(r => r.Rating);
       _bookRepository.Update(book);
     }
   }

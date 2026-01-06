@@ -29,6 +29,7 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 // --- DI (Repositories + Services) ---
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IBookRatingRepository, BookRatingRepository>();
 
 
 builder.Services.AddScoped<UserService>();
