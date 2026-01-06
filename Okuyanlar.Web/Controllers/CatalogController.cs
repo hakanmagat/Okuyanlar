@@ -74,33 +74,5 @@ namespace Okuyanlar.Web.Controllers
             return View(model);
         }
 
-        // /Catalog/Top10
-        [HttpGet]
-        public IActionResult Top10()
-        {
-            var topBooks = _bookRepository.GetTopRatedBooks(10);
-
-            var top = topBooks
-                .Select(b => new CatalogBookCardVm
-                {
-                    Id = b.Id,
-                    Title = b.Title ?? "",
-                    Author = b.Author ?? "",
-                    Category = b.Category ?? "",
-                    CoverUrl = string.IsNullOrWhiteSpace(b.CoverUrl) ? "/images/book-placeholder.jpg" : b.CoverUrl!,
-                    Rating = (double)b.Rating,
-                    IsAvailable = b.Stock > 0,
-                    ISBN = b.ISBN ?? "",
-                    Stock = b.Stock,
-                })
-                .ToList();
-
-            var model = new Top10ViewModel
-            {
-                Items = top
-            };
-
-            return View(model);
-        }
     }
 }

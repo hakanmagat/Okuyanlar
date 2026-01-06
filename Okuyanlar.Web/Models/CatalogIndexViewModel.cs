@@ -23,8 +23,4 @@ namespace Okuyanlar.Web.Models
         public List<CatalogBookCardVm> Items { get; set; } = new();
     }
 
-    public class Top10ViewModel
-    {
-        public List<CatalogBookCardVm> Items { get; set; } = new();
-    }
 }
