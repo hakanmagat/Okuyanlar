@@ -15,12 +15,14 @@ namespace Okuyanlar.Web.Controllers
         private readonly UserService _userService;
         private readonly IUserRepository _userRepository;
         private readonly IEmailService _emailService;
+        private readonly IBookRepository _bookRepository;
 
-        public StaffController(UserService userService, IUserRepository userRepository, IEmailService emailService)
+        public StaffController(UserService userService, IUserRepository userRepository, IEmailService emailService, IBookRepository bookRepository)
         {
             _userService = userService;
             _userRepository = userRepository;
             _emailService = emailService;
+            _bookRepository = bookRepository;
         }
 
         // -------------------------
@@ -192,6 +194,48 @@ namespace Okuyanlar.Web.Controllers
             var newUser = new User { Username = model.Username, Email = model.Email, Role = selectedRole };
             _userService.CreateUser(creator, newUser);
             return RedirectToAction("UserCreate");
+        }
+
+        // -------------------------
+        // (C) Book Create
+        // -------------------------
+        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [HttpGet]
+        public IActionResult BookCreate()
+        {
+            return View("~/Views/Staff/BookCreate.cshtml", new Book());
+        }
+
+        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult BookCreate(Book model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("~/Views/Staff/BookCreate.cshtml", model);
+            }
+
+            // Check for duplicate ISBN
+            var existingBook = _bookRepository.GetByISBN(model.ISBN);
+            if (existingBook != null)
+            {
+                ModelState.AddModelError(string.Empty, $"A book with ISBN '{model.ISBN}' already exists.");
+                return View("~/Views/Staff/BookCreate.cshtml", model);
+            }
+
+            try
+            {
+                model.CreatedAt = DateTime.UtcNow;
+                _bookRepository.Add(model);
+                TempData["SuccessMessage"] = $"Book '{model.Title}' has been successfully added to the inventory.";
+                return RedirectToAction("BookCreate");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Error creating book: {ex.Message}");
+                return View("~/Views/Staff/BookCreate.cshtml", model);
+            }
         }
     }
 }
