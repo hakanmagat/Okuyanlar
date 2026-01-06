@@ -53,8 +53,32 @@
 
                                 @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("EndUser"))
                                 {
+                                    @if (ViewBag.UserRating != null && (decimal)ViewBag.UserRating > 0)
+                                    {
+                                        <div class="ok-mb-3" style="padding: 0.75rem; background: rgba(245, 166, 35, 0.1); border-radius: 0.5rem; border-left: 3px solid #f5a623;">
+                                            <span style="font-weight:700; color: var(--ok-text); display:block; margin-bottom:0.5rem;">
+                                                <i class="bi bi-check-circle-fill" style="color: #f5a623; margin-right: 0.5rem;"></i>
+                                                Your rating:
+                                            </span>
+                                            <div style="display:flex; align-items:center; gap:.25rem;">
+                                                @for (int i = 0; i < 5; i++)
+                                                {
+                                                    if (i < (int)(decimal)ViewBag.UserRating)
+                                                    {
+                                                        <span style="color: #f5a623; font-size: 1.5rem; line-height: 1;">★</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span style="color: #e0e0e0; font-size: 1.5rem; line-height: 1;">★</span>
+                                                    }
+                                                }
+                                                <span style="margin-left: 0.5rem; font-weight: 800; color: var(--ok-title);">@ViewBag.UserRating</span>
+                                            </div>
+                                        </div>
+                                    }
+
                                     <div class="ok-mb-3" style="display:flex; align-items:center; gap:.5rem;">
-                                        <span style="font-weight:700; color: var(--ok-text);">Rate this book:</span>
+                                        <span style="font-weight:700; color: var(--ok-text);">@(ViewBag.UserRating != null && (decimal)ViewBag.UserRating > 0 ? "Update your rating:" : "Rate this book:")</span>
                                         <div id="rate-stars" aria-label="Rate from 1 to 5 stars" style="display:inline-flex; gap:.25rem;">
                                             <button type="button" class="ok-star" data-star="1" aria-label="1 star" title="1 star">★</button>
                                             <button type="button" class="ok-star" data-star="2" aria-label="2 stars" title="2 stars">★</button>
@@ -150,39 +174,79 @@
         const stars = Array.from(container.querySelectorAll('.ok-star'));
         let selected = 0;
 
+        // Load user's previous rating if available
+        const userRatingStr = '@(ViewBag.UserRating != null ? ((decimal)ViewBag.UserRating).ToString(System.Globalization.CultureInfo.InvariantCulture) : "0")';
+        const userRatingValue = parseFloat(userRatingStr);
+        if (!isNaN(userRatingValue) && userRatingValue > 0) {
+            selected = userRatingValue;
+        }
+
         function paint(n) {
             stars.forEach((s, i) => {
                 s.classList.toggle('active', i < n);
             });
         }
 
+        // Initialize display with selected rating
+        if (selected > 0) {
+            paint(selected);
+        }
+
         stars.forEach(star => {
             star.addEventListener('mouseenter', () => paint(parseInt(star.dataset.star)));
             star.addEventListener('mouseleave', () => paint(selected));
-            star.addEventListener('click', async () => {
-                selected = parseInt(star.dataset.star);
+            star.addEventListener('click', async (e) => {
+                console.log('Star clicked:', e.target.dataset.star);
+                e.preventDefault();
+                const newRating = parseInt(e.target.dataset.star);
+                selected = newRating;
                 paint(selected);
-                await sendRating(@Model.Id, selected);
+                console.log('Calling sendRating with bookId:', @Model.Id, 'rating:', newRating);
+                await sendRating(@Model.Id, newRating);
             });
         });
 
         async function sendRating(bookId, rating) {
             try {
+                console.log('sendRating called with:', { bookId, rating });
+                
+                const formData = new FormData();
+                formData.append('bookId', String(bookId));
+                formData.append('rating', String(rating));
+
+                console.log('Sending POST to /Books/Rate');
                 const resp = await fetch('/Books/Rate', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ bookId: String(bookId), rating: String(rating) })
+                    body: formData
                 });
-                const data = await resp.json();
-                if (data && data.success) {
-                    OkToast && OkToast.success('Thanks for rating!', 'Rated');
-                    // Optionally refresh page or update average via another call.
+                
+                console.log('Response received - Status:', resp.status);
+                const text = await resp.text();
+                console.log('Response text:', text);
+                
+                let data = {};
+                try {
+                    data = JSON.parse(text);
+                    console.log('Parsed JSON:', data);
+                } catch (e) {
+                    console.error('Failed to parse JSON:', e, 'Raw text:', text);
+                }
+                
+                if (resp.ok && data.success) {
+                    console.log('Rating submitted successfully');
+                    if (window.OkToast) OkToast.success('Thanks for rating!', 'Rated');
+                    setTimeout(() => {
+                        console.log('Reloading page...');
+                        location.reload();
+                    }, 500);
                 } else {
-                    throw new Error(data?.message || 'Rating failed');
+                    const msg = data?.message || `HTTP ${resp.status}`;
+                    console.error('Rating submission failed:', msg);
+                    if (window.OkToast) OkToast.error('Rating failed: ' + msg, 'Error');
                 }
             } catch (err) {
-                console.error(err);
-                OkToast && OkToast.error('Could not submit rating', 'Error');
+                console.error('Rating error:', err.message);
+                if (window.OkToast) OkToast.error('Error: ' + err.message, 'Error');
             }
         }
     })();

@@ -186,5 +186,22 @@ namespace Okuyanlar.Service.Services
       book.Rating = ratings.Count == 0 ? 0 : ratings.Average(r => r.Rating);
       _bookRepository.Update(book);
     }
+
+    /// <summary>
+    /// Retrieves the rating for a specific user and book.
+    /// Returns null if the user has not rated this book.
+    /// </summary>
+    public decimal? GetUserRatingForBook(int bookId, string userEmail)
+    {
+      if (_userRepository == null || _bookRatingRepository == null)
+        return null;
+
+      var user = _userRepository.GetByEmail(userEmail);
+      if (user == null)
+        return null;
+
+      var rating = _bookRatingRepository.GetByBookAndUser(bookId, user.Id);
+      return rating?.Rating;
+    }
   }
 }

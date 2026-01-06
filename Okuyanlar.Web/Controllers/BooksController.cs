@@ -29,6 +29,18 @@ namespace Okuyanlar.Web.Controllers
             if (book == null)
                 return NotFound();
 
+            // Load user's previous rating if logged in
+            decimal? userRating = null;
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                if (!string.IsNullOrWhiteSpace(email))
+                {
+                    userRating = _bookService.GetUserRatingForBook(id, email);
+                }
+            }
+
+            ViewBag.UserRating = userRating;
             return View(book);
         }
 
