@@ -7,47 +7,46 @@
 
 <div class="ok-section">
     <div class="container ok-container">
+        @* bootstrap row yerine senin CSS'indeki ok-flex yapısını kullanarak garantiliyoruz *@
+        <div class="ok-flex ok-gap-4 ok-flex-wrap" style="align-items: flex-start;">
 
-        <div class="row ok-gap-4">
-
-            <!-- LEFT: Cover -->
-            <div class="col-md-4">
-                <div class="ok-card">
+            <div style="flex: 0 0 350px; max-width: 100%;">
+                <div class="ok-card" style="margin-bottom: 2rem;">
                     <img src="https://via.placeholder.com/400x550?text=No+Cover"
                          alt="@Model.Title"
                          class="ok-book-cover"
-                         style="height:550px;" />
+                         style="height: 500px; width: 100%; object-fit: cover; display: block;" />
                 </div>
             </div>
 
-            <!-- RIGHT: Details -->
-            <div class="col-md-8">
+            <div style="flex: 1; min-width: 300px;">
                 <div class="ok-card">
                     <div class="ok-card-body">
 
-                        <h1 style="font-weight:900; margin-bottom:.25rem;">
+                        <h1 style="font-weight:900; margin-bottom:.25rem; font-size: 2.5rem;">
                             @Model.Title
                         </h1>
-                        <p style="font-weight:700; opacity:.75;">
+                        <p style="font-weight:700; opacity:.75; font-size: 1.2rem; margin-bottom: 1.5rem;">
                             by @Model.Author
                         </p>
 
                         <div class="ok-mb-3">
                             <span class="ok-badge ok-badge-accent">ISBN</span>
-                            <span style="font-weight:800; margin-left:.5rem;">
+                            <span style="font-weight:800; margin-left:.5rem; color: var(--ok-title);">
                                 @Model.ISBN
                             </span>
                         </div>
 
-                        <!-- Availability Panel -->
-                        <div class="ok-card ok-mt-3" style="box-shadow: var(--ok-shadow-sm);">
+                        <hr style="border: 0; border-top: 1px solid var(--ok-border); margin: 1.5rem 0;">
+
+                        <div class="ok-card ok-mt-3" style="box-shadow: var(--ok-shadow-sm); background: rgba(0,0,0,0.02);">
                             <div class="ok-card-body">
 
                                 @if (Model.Stock > 0)
                                 {
                                     <span class="ok-badge ok-badge-success">Available</span>
 
-                                    <p class="ok-mt-2" style="font-weight:700;">
+                                    <p class="ok-mt-2" style="font-weight:700; color: var(--ok-text);">
                                         This book is currently available for borrowing.
                                     </p>
 
@@ -61,7 +60,7 @@
                                 {
                                     <span class="ok-badge ok-badge-secondary">Unavailable</span>
 
-                                    <p class="ok-mt-2" style="font-weight:700;">
+                                    <p class="ok-mt-2" style="font-weight:700; color: var(--ok-text);">
                                         This book is currently borrowed by another member.
                                     </p>
 
@@ -83,7 +82,7 @@
                         </div>
 
                         <div class="ok-mt-4">
-                            <a asp-action="Index" class="btn-ok-secondary">
+                            <a asp-action="Index" class="btn-ok-secondary" style="display: inline-flex; align-items: center;">
                                 <i class="bi bi-arrow-left me-2"></i>
                                 Back to Catalog
                             </a>
