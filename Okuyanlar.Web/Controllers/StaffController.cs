@@ -16,13 +16,15 @@ namespace Okuyanlar.Web.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IEmailService _emailService;
         private readonly IBookRepository _bookRepository;
+        private readonly IWebHostEnvironment _env;
 
-        public StaffController(UserService userService, IUserRepository userRepository, IEmailService emailService, IBookRepository bookRepository)
+        public StaffController(UserService userService, IUserRepository userRepository, IEmailService emailService, IBookRepository bookRepository, IWebHostEnvironment env)
         {
             _userService = userService;
             _userRepository = userRepository;
             _emailService = emailService;
             _bookRepository = bookRepository;
+            _env = env;
         }
 
         // -------------------------
@@ -207,9 +209,19 @@ namespace Okuyanlar.Web.Controllers
         }
 
         [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [HttpGet]
+        public IActionResult BookManage()
+        {
+            var books = _bookRepository.GetAll()
+                .OrderByDescending(b => b.CreatedAt)
+                .ToList();
+            return View("~/Views/Staff/BookManage.cshtml", books);
+        }
+
+        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult BookCreate(Book model)
+        public IActionResult BookCreate(Book model, IFormFile? coverImage)
         {
             if (!ModelState.IsValid)
             {
@@ -226,15 +238,160 @@ namespace Okuyanlar.Web.Controllers
 
             try
             {
+                // Handle optional cover image upload
+                if (coverImage != null && coverImage.Length > 0)
+                {
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                    var ext = Path.GetExtension(coverImage.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(ext))
+                    {
+                        ModelState.AddModelError(string.Empty, "Only image files are allowed (.jpg, .jpeg, .png, .gif, .webp).");
+                        return View("~/Views/Staff/BookCreate.cshtml", model);
+                    }
+
+                    // Max 5 MB
+                    const long maxBytes = 5 * 1024 * 1024;
+                    if (coverImage.Length > maxBytes)
+                    {
+                        ModelState.AddModelError(string.Empty, "Image file too large (max 5 MB).");
+                        return View("~/Views/Staff/BookCreate.cshtml", model);
+                    }
+
+                    var webRoot = _env.WebRootPath;
+                    var coversDir = Path.Combine(webRoot, "images", "covers");
+                    if (!Directory.Exists(coversDir))
+                    {
+                        Directory.CreateDirectory(coversDir);
+                    }
+
+                    // Unique file name
+                    var fileName = $"book_{Guid.NewGuid():N}{ext}";
+                    var savePath = Path.Combine(coversDir, fileName);
+                    using (var stream = new FileStream(savePath, FileMode.Create))
+                    {
+                        coverImage.CopyTo(stream);
+                    }
+
+                    // Persist relative path for web usage
+                    model.CoverUrl = $"/images/covers/{fileName}";
+                }
+
                 model.CreatedAt = DateTime.UtcNow;
                 _bookRepository.Add(model);
                 TempData["SuccessMessage"] = $"Book '{model.Title}' has been successfully added to the inventory.";
-                return RedirectToAction("BookCreate");
+                return RedirectToAction("BookManage");
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, $"Error creating book: {ex.Message}");
                 return View("~/Views/Staff/BookCreate.cshtml", model);
+            }
+        }
+
+        // -------------------------
+        // Book Edit
+        // -------------------------
+        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [HttpGet]
+        public IActionResult BookEdit(int id)
+        {
+            var book = _bookRepository.GetById(id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            return View("~/Views/Staff/BookEdit.cshtml", book);
+        }
+
+        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult BookEdit(Book model, IFormFile? coverImage)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("~/Views/Staff/BookEdit.cshtml", model);
+            }
+
+            var book = _bookRepository.GetById(model.Id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            // Check for duplicate ISBN on other books
+            var isbnOwner = _bookRepository.GetByISBN(model.ISBN);
+            if (isbnOwner != null && isbnOwner.Id != model.Id)
+            {
+                ModelState.AddModelError(string.Empty, $"Another book with ISBN '{model.ISBN}' already exists.");
+                return View("~/Views/Staff/BookEdit.cshtml", model);
+            }
+
+            try
+            {
+                // Handle optional cover image upload
+                if (coverImage != null && coverImage.Length > 0)
+                {
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                    var ext = Path.GetExtension(coverImage.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(ext))
+                    {
+                        ModelState.AddModelError(string.Empty, "Only image files are allowed (.jpg, .jpeg, .png, .gif, .webp).");
+                        return View("~/Views/Staff/BookEdit.cshtml", model);
+                    }
+
+                    const long maxBytes = 5 * 1024 * 1024;
+                    if (coverImage.Length > maxBytes)
+                    {
+                        ModelState.AddModelError(string.Empty, "Image file too large (max 5 MB).");
+                        return View("~/Views/Staff/BookEdit.cshtml", model);
+                    }
+
+                    var webRoot = _env.WebRootPath;
+                    var coversDir = Path.Combine(webRoot, "images", "covers");
+                    if (!Directory.Exists(coversDir))
+                    {
+                        Directory.CreateDirectory(coversDir);
+                    }
+
+                    var fileName = $"book_{Guid.NewGuid():N}{ext}";
+                    var savePath = Path.Combine(coversDir, fileName);
+                    using (var stream = new FileStream(savePath, FileMode.Create))
+                    {
+                        coverImage.CopyTo(stream);
+                    }
+
+                    // Optional cleanup: remove old cover if it was inside covers dir
+                    if (!string.IsNullOrWhiteSpace(book.CoverUrl))
+                    {
+                        var oldPath = book.CoverUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
+                        var fullOldPath = Path.Combine(_env.WebRootPath, oldPath);
+                        if (System.IO.File.Exists(fullOldPath) && fullOldPath.Contains(Path.Combine(_env.WebRootPath, "images", "covers")))
+                        {
+                            System.IO.File.Delete(fullOldPath);
+                        }
+                    }
+
+                    book.CoverUrl = $"/images/covers/{fileName}";
+                }
+
+                // Update fields
+                book.Title = model.Title;
+                book.Author = model.Author;
+                book.ISBN = model.ISBN;
+                book.Stock = model.Stock;
+                book.IsActive = model.IsActive;
+                book.Category = model.Category;
+
+                _bookRepository.Update(book);
+                TempData["SuccessMessage"] = $"Book '{book.Title}' has been updated.";
+                return RedirectToAction("BookManage");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Error updating book: {ex.Message}");
+                return View("~/Views/Staff/BookEdit.cshtml", model);
             }
         }
     }

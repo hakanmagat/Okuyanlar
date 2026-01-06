@@ -35,7 +35,7 @@
 
                     <!-- Body -->
                     <div class="ok-card-body">
-                        <form asp-action="Edit" method="post" id="bookEditForm">
+                        <form asp-action="BookEdit" method="post" id="bookEditForm" enctype="multipart/form-data">
                             @Html.AntiForgeryToken()
 
                             <input type="hidden" asp-for="Id" />
@@ -69,6 +69,20 @@
                                 </div>
                             </div>
 
+                            <div class="row">
+                                <div class="col-md-12 ok-mb-3">
+                                    <label class="ok-form-label">Cover Image</label>
+                                    <div class="ok-flex ok-gap-3 ok-flex-wrap ok-items-center">
+                                        @{ var coverUrl = string.IsNullOrWhiteSpace(Model.CoverUrl) ? "/images/book-placeholder.jpg" : Model.CoverUrl; }
+                                        <img src="@coverUrl" alt="@Model.Title cover" style="width:120px; height:160px; object-fit:cover; border-radius:8px;" onerror="this.src='/images/book-placeholder.jpg'" />
+                                        <div style="flex:1; min-width:220px;">
+                                            <input type="file" name="coverImage" class="ok-form-control" accept="image/*" />
+                                            <small style="opacity:.75; font-weight:800;">Leave empty to keep current cover. Max 5 MB.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Availability toggle -->
                             <div class="ok-card ok-mt-2" style="box-shadow: var(--ok-shadow-sm); border-radius:14px;">
                                 <div class="ok-card-body" style="padding: 1rem 1.25rem;">
@@ -94,7 +108,7 @@
 
                             <!-- Actions -->
                             <div class="ok-mt-4 ok-flex ok-justify-between ok-items-center ok-gap-2 ok-flex-wrap">
-                                <a asp-action="Index" class="btn-ok-secondary" style="text-align:center; min-width:160px;">
+                                <a asp-action="BookManage" class="btn-ok-secondary" style="text-align:center; min-width:160px;">
                                     <i class="bi bi-x-circle me-2"></i> Cancel
                                 </a>
 

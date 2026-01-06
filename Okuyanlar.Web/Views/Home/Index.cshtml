@@ -46,9 +46,13 @@
             <div class="ok-grid ok-grid-4">
                 @foreach (var book in Model.Take(8))
                 {
+                    var coverUrl = string.IsNullOrWhiteSpace(book.CoverUrl)
+                        ? "/images/book-placeholder.jpg"
+                        : book.CoverUrl;
+
                     <div class="ok-book-card">
-                        <img src="https://via.placeholder.com/300x400?text=No+Cover"
-                             alt="@book.Title"
+                        <img src="@coverUrl"
+                             alt="@book.Title cover"
                              class="ok-book-cover" />
 
                         <div class="ok-book-body">

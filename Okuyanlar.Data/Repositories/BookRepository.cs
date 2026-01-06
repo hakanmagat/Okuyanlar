@@ -72,5 +72,16 @@ namespace Okuyanlar.Data.Repositories
           .Where(b => b.Title.Contains(searchTerm) || b.Author.Contains(searchTerm))
           .ToList();
     }
+
+    /// <inheritdoc />
+    public IEnumerable<Book> GetTopRatedBooks(int count = 10)
+    {
+      return _context.Books
+          .Where(b => b.IsActive)
+          .OrderByDescending(b => b.Rating)
+          .ThenByDescending(b => b.RatingCount)
+          .Take(count)
+          .ToList();
+    }
   }
 }

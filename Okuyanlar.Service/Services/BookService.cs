@@ -93,5 +93,42 @@ namespace Okuyanlar.Service.Services
       // We can add extra logic here later (e.g., logging searches)
       return _bookRepository.SearchBooks(searchTerm);
     }
+
+    /// <summary>
+    /// Retrieves the top 10 books sorted by rating.
+    /// </summary>
+    /// <returns>List of top 10 rated books.</returns>
+    public IEnumerable<Book> GetTopRatedBooks(int count = 10)
+    {
+      return _bookRepository.GetTopRatedBooks(count);
+    }
+
+    /// <summary>
+    /// Adds or updates a rating for a book.
+    /// Calculates the average rating based on total ratings.
+    /// </summary>
+    /// <param name="bookId">The ID of the book to rate.</param>
+    /// <param name="ratingValue">The rating value (typically 1-5).</param>
+    /// <exception cref="Exception">Thrown if book not found.</exception>
+    public void RateBook(int bookId, decimal ratingValue)
+    {
+      if (ratingValue < 0 || ratingValue > 5)
+      {
+        throw new ArgumentException("Rating must be between 0 and 5.");
+      }
+
+      var book = _bookRepository.GetById(bookId);
+      if (book == null)
+      {
+        throw new Exception("Book not found.");
+      }
+
+      // Calculate new average rating
+      decimal totalRating = (book.Rating * book.RatingCount) + ratingValue;
+      book.RatingCount++;
+      book.Rating = totalRating / book.RatingCount;
+
+      _bookRepository.Update(book);
+    }
   }
 }

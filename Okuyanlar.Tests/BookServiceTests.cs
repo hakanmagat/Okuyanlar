@@ -247,5 +247,49 @@ namespace Okuyanlar.Tests
       // Assert - should not throw exception
       _mockBookRepository.Verify(x => x.Delete(bookId), Times.Never);
     }
+
+    // --- RATE BOOK TESTS ---
+
+    [Fact]
+    public void RateBook_Should_UpdateAverage_When_ValidRating()
+    {
+      // Arrange
+      var book = new Book { Id = 1, Rating = 0m, RatingCount = 0 };
+      _mockBookRepository.Setup(x => x.GetById(book.Id)).Returns(book);
+
+      // Act - first rating 4
+      _bookService.RateBook(book.Id, 4m);
+
+      // Assert - first update
+      Assert.Equal(1, book.RatingCount);
+      Assert.Equal(4m, book.Rating);
+      _mockBookRepository.Verify(x => x.Update(It.Is<Book>(b => b.RatingCount == 1 && b.Rating == 4m)), Times.Once);
+
+      // Arrange for second rating: repository returns the same mutated book
+      _mockBookRepository.Invocations.Clear();
+      _mockBookRepository.Setup(x => x.GetById(book.Id)).Returns(book);
+
+      // Act - second rating 2
+      _bookService.RateBook(book.Id, 2m);
+
+      // Assert - average (4 + 2) / 2 = 3
+      Assert.Equal(2, book.RatingCount);
+      Assert.Equal(3m, book.Rating);
+      _mockBookRepository.Verify(x => x.Update(It.Is<Book>(b => b.RatingCount == 2 && b.Rating == 3m)), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(5.1)]
+    public void RateBook_Should_Throw_When_RatingOutOfRange(decimal rating)
+    {
+      // Arrange
+      var bookId = 1;
+
+      // Act & Assert
+      var ex = Assert.Throws<ArgumentException>(() => _bookService.RateBook(bookId, rating));
+      Assert.Equal("Rating must be between 0 and 5.", ex.Message);
+      _mockBookRepository.Verify(x => x.Update(It.IsAny<Book>()), Times.Never);
+    }
   }
 }

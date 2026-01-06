@@ -41,6 +41,7 @@ namespace Okuyanlar.Web.Controllers
             {
                 "title" => books.OrderBy(b => b.Title),
                 "new" => books.OrderByDescending(b => b.CreatedAt),
+                "rating" => books.OrderByDescending(b => b.Rating).ThenByDescending(b => b.RatingCount),
                 _ => books.OrderBy(b => b.Title)
             };
 
@@ -56,6 +57,7 @@ namespace Okuyanlar.Web.Controllers
                     Author = b.Author ?? "",
                     Category = b.Category ?? "",
                     CoverUrl = string.IsNullOrWhiteSpace(b.CoverUrl) ? "/images/book-placeholder.jpg" : b.CoverUrl!,
+                    Rating = (double)b.Rating,
                     IsAvailable = b.Stock > 0,
                     ISBN = b.ISBN ?? "",
                     Stock = b.Stock,
@@ -76,12 +78,9 @@ namespace Okuyanlar.Web.Controllers
         [HttpGet]
         public IActionResult Top10()
         {
-            var books = _bookRepository.GetAll();
+            var topBooks = _bookRepository.GetTopRatedBooks(10);
 
-            var top = books
-                .OrderByDescending(b => b.Category)
-                .ThenBy(b => b.Title)
-                .Take(10)
+            var top = topBooks
                 .Select(b => new CatalogBookCardVm
                 {
                     Id = b.Id,
@@ -89,6 +88,7 @@ namespace Okuyanlar.Web.Controllers
                     Author = b.Author ?? "",
                     Category = b.Category ?? "",
                     CoverUrl = string.IsNullOrWhiteSpace(b.CoverUrl) ? "/images/book-placeholder.jpg" : b.CoverUrl!,
+                    Rating = (double)b.Rating,
                     IsAvailable = b.Stock > 0,
                     ISBN = b.ISBN ?? "",
                     Stock = b.Stock,

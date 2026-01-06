@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Okuyanlar.Core.Entities;
+using Okuyanlar.Service.Services;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,28 +8,51 @@ namespace Okuyanlar.Web.Controllers
 {
     public class BooksController : Controller
     {
-        // Temporary demo data (to preview UI without backend wired up)
-        private static readonly List<Book> DemoBooks = new()
+        private readonly BookService _bookService;
+
+        public BooksController(BookService bookService)
         {
-            new Book { Id = 1, Title = "Clean Code", Author = "Robert C. Martin", ISBN = "978-0132350884", Stock = 3, IsActive = true },
-            new Book { Id = 2, Title = "Design Patterns", Author = "GoF", ISBN = "978-0201633610", Stock = 0, IsActive = true },
-            new Book { Id = 9, Title = "The Pragmatic Programmer", Author = "Andrew Hunt", ISBN = "978-0201616224", Stock = 1, IsActive = true },
-        };
+            _bookService = bookService;
+        }
 
         // /Books or /Books/Index
         public IActionResult Index()
         {
-            return View(DemoBooks);
+            var books = _bookService.GetAllBooks();
+            return View(books);
         }
 
         // /Books/Details/9
         public IActionResult Details(int id)
         {
-            var book = DemoBooks.FirstOrDefault(b => b.Id == id);
+            var book = _bookService.GetBookById(id);
             if (book == null)
                 return NotFound();
 
             return View(book);
         }
+
+        // /Books/Top10
+        public IActionResult Top10()
+        {
+            var topBooks = _bookService.GetTopRatedBooks(10);
+            return View(topBooks);
+        }
+
+        // POST /Books/Rate
+        [HttpPost]
+        public IActionResult Rate(int bookId, decimal rating)
+        {
+            try
+            {
+                _bookService.RateBook(bookId, rating);
+                return Ok(new { success = true, message = "Book rated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
     }
 }
+

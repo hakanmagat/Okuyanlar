@@ -21,31 +21,38 @@ namespace Okuyanlar.Data
       // 1. Ensure the database file exists
       context.Database.EnsureCreated();
 
-      // 2. CHECK: Is there any user with the 'SystemAdmin' role?
-      bool systemAdminExists = context.Users.Any(u => u.Role == UserRole.SystemAdmin);
+      // 2. Ensure a SystemAdmin exists with updated defaults
+      var existingOldSysAdmin = context.Users.FirstOrDefault(u => u.Role == UserRole.SystemAdmin && u.Email == "admin@okuyanlar.com");
+      var existingNewSysAdmin = context.Users.FirstOrDefault(u => u.Role == UserRole.SystemAdmin && u.Email == "sys@okuyanlar.oku");
 
-      if (systemAdminExists)
+      if (existingOldSysAdmin != null)
       {
-        return; // Seed data already exists, no action needed.
+        // Update old seeded admin to new email and password
+        if (existingNewSysAdmin == null)
+        {
+          existingOldSysAdmin.Email = "sys@okuyanlar.oku";
+        }
+        existingOldSysAdmin.Username = string.IsNullOrWhiteSpace(existingOldSysAdmin.Username) ? "SystemAdmin" : existingOldSysAdmin.Username;
+        existingOldSysAdmin.IsActive = true;
+        existingOldSysAdmin.PasswordHash = passwordHasher.HashPassword(existingOldSysAdmin, "pass1234");
+        context.Users.Update(existingOldSysAdmin);
+        context.SaveChanges();
       }
-
-      // 3. CREATE: Prepare the default SystemAdmin entity
-      var sysAdmin = new User
+      else if (existingNewSysAdmin == null)
       {
-        Username = "SystemAdmin",
-        Email = "admin@okuyanlar.com",
-        Role = UserRole.SystemAdmin,
-        IsActive = true, // Auto-activate since we are setting the password manually
-        CreatedAt = DateTime.UtcNow,
-        PasswordHash = "" // Will be set below
-      };
-
-      // 4. HASH: Securely hash the default password "Admin123!"
-      sysAdmin.PasswordHash = passwordHasher.HashPassword(sysAdmin, "Admin123!");
-
-      // 5. SAVE: Persist to database
-      context.Users.Add(sysAdmin);
-      context.SaveChanges();
+        // Create default SystemAdmin if none exists
+        var sysAdmin = new User
+        {
+          Username = "SystemAdmin",
+          Email = "sys@okuyanlar.oku",
+          Role = UserRole.SystemAdmin,
+          IsActive = true,
+          CreatedAt = DateTime.UtcNow
+        };
+        sysAdmin.PasswordHash = passwordHasher.HashPassword(sysAdmin, "pass1234");
+        context.Users.Add(sysAdmin);
+        context.SaveChanges();
+      }
 
       // 6. SEED BOOKS: Add demo books if none exist
       if (!context.Books.Any())
@@ -143,6 +150,76 @@ namespace Okuyanlar.Data
         };
 
         context.Books.AddRange(demoBooks);
+        context.SaveChanges();
+      }
+
+      // 7. Seed one default user for each role if missing, and normalize usernames
+      // Admin
+      var adminExisting = context.Users.FirstOrDefault(u => u.Role == UserRole.Admin);
+      if (adminExisting == null)
+      {
+        var admin = new User
+        {
+          Username = "Admin",
+          Email = "admin@okuyanlar.oku",
+          Role = UserRole.Admin,
+          IsActive = true,
+          CreatedAt = DateTime.UtcNow
+        };
+        admin.PasswordHash = passwordHasher.HashPassword(admin, "pass1234");
+        context.Users.Add(admin);
+        context.SaveChanges();
+      }
+      else if (adminExisting.Username.StartsWith("Default", StringComparison.OrdinalIgnoreCase))
+      {
+        adminExisting.Username = "Admin";
+        context.Users.Update(adminExisting);
+        context.SaveChanges();
+      }
+
+      // Librarian
+      var librarianExisting = context.Users.FirstOrDefault(u => u.Role == UserRole.Librarian);
+      if (librarianExisting == null)
+      {
+        var librarian = new User
+        {
+          Username = "Librarian",
+          Email = "librarian@okuyanlar.oku",
+          Role = UserRole.Librarian,
+          IsActive = true,
+          CreatedAt = DateTime.UtcNow
+        };
+        librarian.PasswordHash = passwordHasher.HashPassword(librarian, "pass1234");
+        context.Users.Add(librarian);
+        context.SaveChanges();
+      }
+      else if (librarianExisting.Username.StartsWith("Default", StringComparison.OrdinalIgnoreCase))
+      {
+        librarianExisting.Username = "Librarian";
+        context.Users.Update(librarianExisting);
+        context.SaveChanges();
+      }
+
+      // EndUser
+      var endUserExisting = context.Users.FirstOrDefault(u => u.Role == UserRole.EndUser);
+      if (endUserExisting == null)
+      {
+        var endUser = new User
+        {
+          Username = "User",
+          Email = "user@okuyanlar.oku",
+          Role = UserRole.EndUser,
+          IsActive = true,
+          CreatedAt = DateTime.UtcNow
+        };
+        endUser.PasswordHash = passwordHasher.HashPassword(endUser, "pass1234");
+        context.Users.Add(endUser);
+        context.SaveChanges();
+      }
+      else if (endUserExisting.Username.StartsWith("Default", StringComparison.OrdinalIgnoreCase))
+      {
+        endUserExisting.Username = "User";
+        context.Users.Update(endUserExisting);
         context.SaveChanges();
       }
     }

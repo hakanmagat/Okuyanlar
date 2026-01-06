@@ -55,5 +55,12 @@ namespace Okuyanlar.Core.Interfaces
     /// </summary>
     /// <returns>A collection of all books.</returns>
     IEnumerable<Book> GetAll();
+
+    /// <summary>
+    /// Retrieves the top N books sorted by rating in descending order.
+    /// </summary>
+    /// <param name="count">The number of top-rated books to retrieve (default 10).</param>
+    /// <returns>A collection of top-rated books.</returns>
+    IEnumerable<Book> GetTopRatedBooks(int count = 10);
   }
 }

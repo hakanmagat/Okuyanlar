@@ -39,5 +39,16 @@ namespace Okuyanlar.Core.Entities
     /// Indicates if the book is available for borrowing.
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// The rating/rank of the book (0-5 stars or a numeric score).
+    /// Used for displaying top-ranked books.
+    /// </summary>
+    public decimal Rating { get; set; } = 0;
+
+    /// <summary>
+    /// The number of ratings this book has received.
+    /// </summary>
+    public int RatingCount { get; set; } = 0;
   }
 }
