@@ -79,7 +79,7 @@ namespace Okuyanlar.Data.Repositories
       return _context.Books
           .Where(b => b.IsActive)
           .OrderByDescending(b => b.Rating)
-          .ThenByDescending(b => b.RatingCount)
+          .ThenBy(b => b.Title)
           .Take(count)
           .ToList();
     }
