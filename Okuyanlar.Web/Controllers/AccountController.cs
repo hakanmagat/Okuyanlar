@@ -251,5 +251,14 @@ namespace Okuyanlar.Web.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        // -------------------- LIST USERS (ADMIN/SYSTEMADMIN) --------------------
+        [Authorize(Roles = "SystemAdmin,Admin")]
+        [HttpGet]
+        public IActionResult ListUsers()
+        {
+            var users = _userRepository.GetAll().ToList();
+            return PartialView("~/Views/Staff/_UserListModal.cshtml", users);
+        }
     }
 }
