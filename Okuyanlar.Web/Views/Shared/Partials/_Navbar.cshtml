@@ -47,12 +47,14 @@
                         </form>
                     </li>
 
-                    <li class="nav-item">
-                        <form class="btn btn-ok-primary" asp-controller="Account" asp-action="Logout" method="post" >
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-ok-primary">Logout</button>
-                        </form>
-                    </li>
+                        <li class="nav-item">
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-ok-primary ok-nav-btn">
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
                 }
                 else
                 {
