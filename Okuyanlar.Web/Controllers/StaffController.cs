@@ -394,5 +394,45 @@ namespace Okuyanlar.Web.Controllers
                 return View("~/Views/Staff/BookEdit.cshtml", model);
             }
         }
+
+        // -------------------------
+        // Remove Book Cover
+        // -------------------------
+        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RemoveBookCover(int id)
+        {
+            var book = _bookRepository.GetById(id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(book.CoverUrl))
+                {
+                    var relativePath = book.CoverUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
+                    var fullPath = Path.Combine(_env.WebRootPath, relativePath);
+
+                    var coversRoot = Path.Combine(_env.WebRootPath, "images", "covers");
+                    if (System.IO.File.Exists(fullPath) && fullPath.StartsWith(coversRoot, StringComparison.OrdinalIgnoreCase))
+                    {
+                        System.IO.File.Delete(fullPath);
+                    }
+                }
+
+                book.CoverUrl = null;
+                _bookRepository.Update(book);
+                TempData["SuccessMessage"] = $"Cover removed for '{book.Title}'.";
+                return RedirectToAction("BookEdit", new { id = book.Id });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Failed to remove cover: {ex.Message}";
+                return RedirectToAction("BookEdit", new { id = id });
+            }
+        }
     }
 }

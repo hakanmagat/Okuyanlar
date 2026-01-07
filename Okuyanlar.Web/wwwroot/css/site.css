@@ -778,6 +778,26 @@ a {
     padding: 0 1.5rem;
 }
 
+/* =========================
+   Image Placeholders
+   ========================= */
+
+.ok-no-image {
+    background: var(--ok-bg);
+    color: rgba(44, 39, 33, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.ok-no-image-border {
+    border: 1px dashed var(--ok-border);
+}
+
 .ok-section {
     padding: 3rem 0;
 }

@@ -73,12 +73,30 @@
                                 <div class="col-md-12 ok-mb-3">
                                     <label class="ok-form-label">Cover Image</label>
                                     <div class="ok-flex ok-gap-3 ok-flex-wrap ok-items-center">
-                                        @{ var coverUrl = string.IsNullOrWhiteSpace(Model.CoverUrl) ? "/images/book-placeholder.jpg" : Model.CoverUrl; }
-                                        <img src="@coverUrl" alt="@Model.Title cover" style="width:120px; height:160px; object-fit:cover; border-radius:8px;" onerror="this.src='/images/book-placeholder.jpg'" />
+                                        @if (!string.IsNullOrWhiteSpace(Model.CoverUrl))
+                                        {
+                                            <img src="@Model.CoverUrl" alt="@Model.Title cover" style="width:120px; height:160px; object-fit:cover; border-radius:8px;" onerror="this.src='/images/book-placeholder.jpg'" />
+                                        }
+                                        else
+                                        {
+                                            <div class="ok-no-image ok-no-image-border" style="width:120px; height:160px; border-radius:8px; font-size:.8rem;">NO IMAGE</div>
+                                        }
                                         <div style="flex:1; min-width:220px;">
                                             <input type="file" name="coverImage" class="ok-form-control" accept="image/*" />
-                                            <small style="opacity:.75; font-weight:800;">Leave empty to keep current cover. Max 5 MB.</small>
+                                            <small style="opacity:.75; font-weight:800;">Upload to replace. Max 5 MB.</small>
                                         </div>
+                                        @if (!string.IsNullOrWhiteSpace(Model.CoverUrl))
+                                        {
+                                            <button type="submit"
+                                                    class="btn-ok-danger"
+                                                    formaction="@Url.Action("RemoveBookCover", "Staff")"
+                                                    formmethod="post"
+                                                    formnovalidate
+                                                    data-bypass-validation="true"
+                                                    onclick="return confirm('Remove current cover image?');">
+                                                <i class="bi bi-trash me-1"></i> Remove Cover
+                                            </button>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -140,7 +158,9 @@
             if (!form) return;
 
             form.addEventListener("submit", function (e) {
-                if (window.OkValidation && !OkValidation.validate(form)) {
+                var submitter = e.submitter || null;
+                var bypass = submitter && submitter.dataset && submitter.dataset.bypassValidation === 'true';
+                if (!bypass && window.OkValidation && !OkValidation.validate(form)) {
                     e.preventDefault();
                     if (window.OkToast) OkToast.error("Please check the form fields.", "Validation");
                     return;

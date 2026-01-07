@@ -55,10 +55,17 @@
                         <tbody>
                             @foreach (var b in Model)
                             {
-                                var coverUrl = string.IsNullOrWhiteSpace(b.CoverUrl) ? "/images/book-placeholder.jpg" : b.CoverUrl;
+                                var coverUrl = b.CoverUrl;
                                 <tr>
                                     <td>
-                                        <img src="@coverUrl" alt="@b.Title cover" style="width:70px; height:90px; object-fit:cover; border-radius:6px;" onerror="this.src='/images/book-placeholder.jpg'" />
+                                        @if (!string.IsNullOrWhiteSpace(coverUrl) && !coverUrl.Contains("book-placeholder.jpg", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <img src="@coverUrl" alt="@b.Title cover" style="width:70px; height:90px; object-fit:cover; border-radius:6px;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="ok-no-image ok-no-image-border" style="width:70px; height:90px; border-radius:6px; font-size:.6rem;">NO IMAGE</div>
+                                        }
                                     </td>
                                     <td style="font-weight:800;">@b.Title</td>
                                     <td>@b.Author</td>

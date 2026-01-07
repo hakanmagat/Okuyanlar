@@ -12,12 +12,17 @@
 
             <div style="flex: 0 0 350px; max-width: 100%;">
                 <div class="ok-card" style="margin-bottom: 2rem;">
-                    @{ var coverUrl = string.IsNullOrWhiteSpace(Model.CoverUrl) ? "/images/book-placeholder.jpg" : Model.CoverUrl; }
-                    <img src="@coverUrl"
-                         alt="@Model.Title cover"
-                         class="ok-book-cover"
-                         style="height: 500px; width: 100%; object-fit: cover; display: block;"
-                         onerror="this.src='/images/book-placeholder.jpg'" />
+                    @if (!string.IsNullOrWhiteSpace(Model.CoverUrl) && !Model.CoverUrl.Contains("book-placeholder.jpg", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <img src="@Model.CoverUrl"
+                             alt="@Model.Title cover"
+                             class="ok-book-cover"
+                             style="height: 500px; width: 100%; object-fit: cover; display: block;" />
+                    }
+                    else
+                    {
+                        <div class="ok-no-image" style="height: 500px; width: 100%; font-size: 1.25rem;">NO IMAGE</div>
+                    }
                 </div>
             </div>
 

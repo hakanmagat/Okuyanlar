@@ -76,11 +76,17 @@
                         <div class="ok-flex ok-gap-4 ok-flex-wrap" style="align-items: flex-start;">
                             <!-- Book Cover -->
                             <div style="flex: 0 0 200px; max-width: 100%;">
-                                <img src="@item.CoverUrl" 
-                                     alt="@item.Title cover" 
-                                     class="ok-book-cover" 
-                                     style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px;"
-                                     onerror="this.src='/images/book-placeholder.jpg'" />
+                                @if (!string.IsNullOrWhiteSpace(item.CoverUrl) && !item.CoverUrl.Contains("book-placeholder.jpg", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <img src="@item.CoverUrl" 
+                                         alt="@item.Title cover" 
+                                         class="ok-book-cover" 
+                                         style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px;" />
+                                }
+                                else
+                                {
+                                    <div class="ok-no-image ok-no-image-border" style="width: 100%; height: 300px; border-radius: 8px;">NO IMAGE</div>
+                                }
                             </div>
 
                             <!-- Book Details -->
