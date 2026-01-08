@@ -19,17 +19,23 @@ namespace Okuyanlar.Web.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IEmailService _emailService;
         private readonly IPasswordTokenService _passwordTokenService;
+        private readonly BookReservationService _reservationService;
+        private readonly BookBorrowService _borrowService;
 
         public AccountController(
             UserService userService,
             IUserRepository userRepository,
             IEmailService emailService,
-            IPasswordTokenService passwordTokenService)
+            IPasswordTokenService passwordTokenService,
+            BookReservationService reservationService,
+            BookBorrowService borrowService)
         {
             _userService = userService;
             _userRepository = userRepository;
             _emailService = emailService;
             _passwordTokenService = passwordTokenService;
+            _reservationService = reservationService;
+            _borrowService = borrowService;
         }
 
         // -------------------- LOGIN --------------------
@@ -220,6 +226,15 @@ namespace Okuyanlar.Web.Controllers
 
             ViewBag.AllowedRoles = allowedRoles;
             ViewBag.CanCreateUser = allowedRoles.Any();
+
+            // Get reservations and borrows for EndUser
+            var reservations = _reservationService.GetUserReservations(email);
+            var borrows = _borrowService.GetUserBorrows(email);
+            var activeReservations = reservations.Where(r => r.Status == "Active").ToList();
+            var activeBorrows = borrows.Where(b => b.Status == "Active" || b.Status == "Overdue").ToList();
+
+            ViewBag.ActiveReservationsCount = activeReservations.Count;
+            ViewBag.ActiveBorrowsCount = activeBorrows.Count;
 
             return View(user);
         }

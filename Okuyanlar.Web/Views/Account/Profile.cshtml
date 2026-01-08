@@ -103,24 +103,30 @@
 
             <div class="ok-mt-4 ok-grid ok-grid-2">
                 <div class="ok-card">
-                    <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;"><i class="bi bi-bag-check-fill"></i> <span>My Books / Borrowed Items</span></div>
+                    <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;"><i class="bi bi-book-fill"></i> <span>My Borrowed Books</span></div>
                     <div class="ok-card-body">
-                        <div style="border: 1px dashed rgba(40,29,22,.25); border-radius: 14px; padding: 1.25rem; background: rgba(243,231,203,.35); font-weight:700; opacity:.85;">
-                            There are no active loans right now. When you borrow a book, you will see its due date and late notices here.
-                        </div>
+                        @if (ViewBag.ActiveBorrowsCount > 0)
+                        {
+                            <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: 1rem; cursor: pointer; transition: all 0.2s;" onclick="window.location.href='@Url.Action("MyBorrows", "Books")'">
+                                <div style="font-weight:800;"><i class="bi bi-book me-2"></i> View My Borrows</div>
+                                <span class="ok-badge ok-badge-primary">@ViewBag.ActiveBorrowsCount</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="border: 1px dashed rgba(40,29,22,.25); border-radius: 14px; padding: 1.25rem; background: rgba(243,231,203,.35); font-weight:700; opacity:.85;">
+                                There are no active loans right now. When you borrow a book, you will see its due date and late notices here.
+                            </div>
+                        }
                     </div>
                 </div>
                 <div class="ok-card">
                     <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;"><i class="bi bi-bookmark-star-fill"></i> <span>My Lists</span></div>
                     <div class="ok-card-body">
                         <div class="ok-flex ok-flex-col ok-gap-2">
-                            <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
-                                <div style="font-weight:800;"><i class="bi bi-eye me-2"></i> Notify Me list</div>
-                                <span class="ok-badge ok-badge-secondary">0</span>
-                            </div>
-                            <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
-                                <div style="font-weight:800;"><i class="bi bi-bookmark-check me-2"></i> Reserved list</div>
-                                <span class="ok-badge ok-badge-secondary">0</span>
+                            <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem; cursor: pointer; transition: all 0.2s;" onclick="window.location.href='@Url.Action("MyReservations", "Books")'">
+                                <div style="font-weight:800;"><i class="bi bi-calendar-check me-2"></i> Reserved list</div>
+                                <span class="ok-badge ok-badge-secondary">@ViewBag.ActiveReservationsCount</span>
                             </div>
                         </div>
                     </div>

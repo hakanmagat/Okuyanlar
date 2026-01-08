@@ -87,15 +87,18 @@ namespace Okuyanlar.Web.Controllers
                 var email = User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
                 if (string.IsNullOrWhiteSpace(email))
                 {
-                    return Unauthorized(new { success = false, message = "Login required." });
+                    TempData["ErrorMessage"] = "Login required.";
+                    return RedirectToAction("Index", "Catalog");
                 }
 
                 _reservationService.ReserveBook(bookId, email, hours);
-                return Ok(new { success = true, message = "Book reserved successfully." });
+                TempData["SuccessMessage"] = "Book reserved successfully.";
+                return RedirectToAction("MyReservations");
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Index", "Catalog");
             }
         }
 
@@ -109,15 +112,18 @@ namespace Okuyanlar.Web.Controllers
                 var email = User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
                 if (string.IsNullOrWhiteSpace(email))
                 {
-                    return Unauthorized(new { success = false, message = "Login required." });
+                    TempData["ErrorMessage"] = "Login required.";
+                    return RedirectToAction("MyReservations");
                 }
 
                 _reservationService.RequestCheckIn(reservationId, email);
-                return Ok(new { success = true, message = "Check-in request submitted." });
+                TempData["SuccessMessage"] = "Check-in request submitted.";
+                return RedirectToAction("MyReservations");
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("MyReservations");
             }
         }
 
@@ -131,15 +137,18 @@ namespace Okuyanlar.Web.Controllers
                 var email = User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
                 if (string.IsNullOrWhiteSpace(email))
                 {
-                    return Unauthorized(new { success = false, message = "Login required." });
+                    TempData["ErrorMessage"] = "Login required.";
+                    return RedirectToAction("MyBorrows");
                 }
 
                 _borrowService.RequestReturn(borrowId, email);
-                return Ok(new { success = true, message = "Return request submitted." });
+                TempData["SuccessMessage"] = "Return request submitted.";
+                return RedirectToAction("MyBorrows");
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("MyBorrows");
             }
         }
 
