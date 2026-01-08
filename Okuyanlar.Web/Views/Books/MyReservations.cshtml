@@ -1,0 +1,104 @@
+@model IEnumerable<Okuyanlar.Core.Entities.BookReservation>
+@{
+    ViewData["Title"] = "My Reservations";
+}
+
+<div class="container mt-4">
+    <h2>My Reservations</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            You don't have any reservations yet.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Reserved At</th>
+                        <th>Expires At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var reservation in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@reservation.Book?.Title</strong><br />
+                                <small>by @reservation.Book?.Author</small>
+                            </td>
+                            <td>@reservation.ReservedAt.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                @reservation.ExpiresAt.ToLocalTime().ToString("MMM dd, yyyy HH:mm")
+                                @{
+                                    var timeLeft = reservation.ExpiresAt - DateTime.UtcNow;
+                                    if (timeLeft.TotalHours > 0 && reservation.Status == "Active")
+                                    {
+                                        <br /><small class="text-muted">(@((int)timeLeft.TotalHours)h @timeLeft.Minutes m left)</small>
+                                    }
+                                    else if (reservation.Status == "Active")
+                                    {
+                                        <br /><small class="text-danger">(Expired)</small>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                @if (reservation.Status == "Active")
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else if (reservation.Status == "CheckedIn")
+                                {
+                                    <span class="badge bg-primary">Checked In</span>
+                                }
+                                else if (reservation.Status == "Expired")
+                                {
+                                    <span class="badge bg-danger">Expired</span>
+                                }
+                                else if (reservation.Status == "Cancelled")
+                                {
+                                    <span class="badge bg-secondary">Cancelled</span>
+                                }
+                                @if (reservation.CheckInRequested && reservation.Status == "Active")
+                                {
+                                    <br /><small class="text-info">Check-in requested</small>
+                                }
+                            </td>
+                            <td>
+                                @if (reservation.Status == "Active" && !reservation.CheckInRequested && DateTime.UtcNow <= reservation.ExpiresAt)
+                                {
+                                    <form method="post" action="@Url.Action("RequestCheckIn", "Books")" style="display: inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="reservationId" value="@reservation.Id" />
+                                        <button type="submit" class="btn btn-sm btn-primary">Request Check-In</button>
+                                    </form>
+                                }
+                                @if (reservation.CheckInRequested && reservation.Status == "Active")
+                                {
+                                    <span class="text-muted small">Waiting for librarian approval</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <a href="@Url.Action("Index", "Catalog")" class="btn btn-secondary mt-3">Back to Catalog</a>
+</div>

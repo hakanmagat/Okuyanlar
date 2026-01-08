@@ -28,6 +28,16 @@ namespace Okuyanlar.Data
     /// </summary>
     public DbSet<BookRating> BookRatings { get; set; }
 
+    /// <summary>
+    /// Represents book reservations.
+    /// </summary>
+    public DbSet<BookReservation> BookReservations { get; set; }
+
+    /// <summary>
+    /// Represents borrowed books.
+    /// </summary>
+    public DbSet<BookBorrow> BookBorrows { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);

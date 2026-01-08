@@ -84,7 +84,7 @@
 
                 <div class="ok-flex ok-gap-2" style="flex-wrap:wrap;">
                     <button type="button" class="btn-ok-accent" id="btnChangePassword"><i class="bi bi-key-fill me-2"></i> Change Password</button>
-                    @if (role == "Librarian" || role == "Admin" || role == "SystemAdmin") {
+                    @if (role == "Librarian") {
                         <a class="btn-ok-primary" asp-controller="Staff" asp-action="BookManage"><i class="bi bi-book-fill me-2"></i> Manage Books</a>
                     }
                     @if (canCreateUser) {

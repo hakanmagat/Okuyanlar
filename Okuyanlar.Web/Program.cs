@@ -30,10 +30,14 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IBookRatingRepository, BookRatingRepository>();
+builder.Services.AddScoped<IBookReservationRepository, BookReservationRepository>();
+builder.Services.AddScoped<IBookBorrowRepository, BookBorrowRepository>();
 
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<BookService>();
+builder.Services.AddScoped<BookReservationService>();
+builder.Services.AddScoped<BookBorrowService>();
 
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

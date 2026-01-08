@@ -13,7 +13,19 @@
                 <div class="ok-pagehead-sub">View, edit, and add inventory records.</div>
             </div>
             <div class="ok-pagehead-actions ok-flex ok-gap-2">
-                <a class="btn-ok-secondary" asp-action="BookCreate">
+                <a class="btn-ok-secondary" asp-action="CheckInRequests">
+                    <i class="bi bi-inbox me-2"></i>Check-In Requests
+                </a>
+                <a class="btn-ok-secondary" asp-action="ReturnRequests">
+                    <i class="bi bi-inbox-fill me-2"></i>Return Requests
+                </a>
+                <a class="btn-ok-secondary" asp-action="ReservationsManage">
+                    <i class="bi bi-calendar-check me-2"></i>Reservations
+                </a>
+                <a class="btn-ok-secondary" asp-action="BorrowsManage">
+                    <i class="bi bi-book me-2"></i>Borrowed Books
+                </a>
+                <a class="btn-ok-primary" asp-action="BookCreate">
                     <i class="bi bi-plus-circle me-2"></i>Add Book
                 </a>
             </div>

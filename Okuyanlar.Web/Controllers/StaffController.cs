@@ -18,14 +18,18 @@ namespace Okuyanlar.Web.Controllers
         private readonly IEmailService _emailService;
         private readonly IBookRepository _bookRepository;
         private readonly IWebHostEnvironment _env;
+        private readonly BookReservationService _reservationService;
+        private readonly BookBorrowService _borrowService;
 
-        public StaffController(UserService userService, IUserRepository userRepository, IEmailService emailService, IBookRepository bookRepository, IWebHostEnvironment env)
+        public StaffController(UserService userService, IUserRepository userRepository, IEmailService emailService, IBookRepository bookRepository, IWebHostEnvironment env, BookReservationService reservationService, BookBorrowService borrowService)
         {
             _userService = userService;
             _userRepository = userRepository;
             _emailService = emailService;
             _bookRepository = bookRepository;
             _env = env;
+            _reservationService = reservationService;
+            _borrowService = borrowService;
         }
 
         // -------------------------
@@ -202,14 +206,14 @@ namespace Okuyanlar.Web.Controllers
         // -------------------------
         // (C) Book Create
         // -------------------------
-        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [Authorize(Roles = "Librarian")]
         [HttpGet]
         public IActionResult BookCreate()
         {
             return View("~/Views/Staff/BookCreate.cshtml", new Book());
         }
 
-        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [Authorize(Roles = "Librarian")]
         [HttpGet]
         public IActionResult BookManage()
         {
@@ -219,7 +223,7 @@ namespace Okuyanlar.Web.Controllers
             return View("~/Views/Staff/BookManage.cshtml", books);
         }
 
-        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [Authorize(Roles = "Librarian")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult BookCreate(Book model, IFormFile? coverImage)
@@ -292,7 +296,7 @@ namespace Okuyanlar.Web.Controllers
         // -------------------------
         // Book Edit
         // -------------------------
-        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [Authorize(Roles = "Librarian")]
         [HttpGet]
         public IActionResult BookEdit(int id)
         {
@@ -305,7 +309,7 @@ namespace Okuyanlar.Web.Controllers
             return View("~/Views/Staff/BookEdit.cshtml", book);
         }
 
-        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [Authorize(Roles = "Librarian")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult BookEdit(Book model, IFormFile? coverImage)
@@ -399,7 +403,7 @@ namespace Okuyanlar.Web.Controllers
         // -------------------------
         // Remove Book Cover
         // -------------------------
-        [Authorize(Roles = "SystemAdmin,Admin,Librarian")]
+        [Authorize(Roles = "Librarian")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult RemoveBookCover(int id)
@@ -433,6 +437,95 @@ namespace Okuyanlar.Web.Controllers
             {
                 TempData["ErrorMessage"] = $"Failed to remove cover: {ex.Message}";
                 return RedirectToAction("BookEdit", new { id = id });
+            }
+        }
+
+        // -------------------------
+        // Reservation & Borrow Management
+        // -------------------------
+        
+        // GET: /Staff/ReservationsManage
+        [Authorize(Roles = "Librarian")]
+        [HttpGet]
+        public IActionResult ReservationsManage()
+        {
+            var reservations = _reservationService.GetAllActiveReservations();
+            return View("~/Views/Staff/ReservationsManage.cshtml", reservations);
+        }
+
+        // GET: /Staff/BorrowsManage
+        [Authorize(Roles = "Librarian")]
+        [HttpGet]
+        public IActionResult BorrowsManage()
+        {
+            var borrows = _borrowService.GetAllActiveBorrows();
+            return View("~/Views/Staff/BorrowsManage.cshtml", borrows);
+        }
+
+        // GET: /Staff/CheckInRequests
+        [Authorize(Roles = "Librarian")]
+        [HttpGet]
+        public IActionResult CheckInRequests()
+        {
+            var requests = _reservationService.GetCheckInRequests();
+            return View("~/Views/Staff/CheckInRequests.cshtml", requests);
+        }
+
+        // POST: /Staff/AcceptCheckIn
+        [Authorize(Roles = "Librarian")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AcceptCheckIn(int reservationId, int borrowDays = 14)
+        {
+            try
+            {
+                var currentUser = GetCurrentUser();
+                if (currentUser == null)
+                    return BadRequest("User not found.");
+
+                var borrow = _reservationService.AcceptCheckIn(reservationId, currentUser.Id, borrowDays);
+                _borrowService.CreateBorrow(borrow);
+
+                TempData["SuccessMessage"] = "Check-in accepted and book borrowed successfully.";
+                return RedirectToAction("CheckInRequests");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("CheckInRequests");
+            }
+        }
+
+        // GET: /Staff/ReturnRequests
+        [Authorize(Roles = "Librarian")]
+        [HttpGet]
+        public IActionResult ReturnRequests()
+        {
+            var requests = _borrowService.GetReturnRequests();
+            return View("~/Views/Staff/ReturnRequests.cshtml", requests);
+        }
+
+        // POST: /Staff/AcceptReturn
+        [Authorize(Roles = "Librarian")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AcceptReturn(int borrowId)
+        {
+            try
+            {
+                var currentUser = GetCurrentUser();
+                if (currentUser == null)
+                    return BadRequest("User not found.");
+
+                _borrowService.AcceptReturn(borrowId, currentUser.Id);
+
+                TempData["SuccessMessage"] = "Return accepted successfully.";
+                return RedirectToAction("ReturnRequests");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("ReturnRequests");
             }
         }
     }

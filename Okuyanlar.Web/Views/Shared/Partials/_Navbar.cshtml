@@ -38,6 +38,36 @@
             <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
                 @if (User?.Identity?.IsAuthenticated == true)
                 {
+                    @if (User.IsInRole("EndUser"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link ok-nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-collection me-1"></i>My Library
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Books" asp-action="MyReservations"><i class="bi bi-calendar-check me-2"></i>My Reservations</a></li>
+                                <li><a class="dropdown-item" asp-controller="Books" asp-action="MyBorrows"><i class="bi bi-book me-2"></i>My Borrowed Books</a></li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("Librarian"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link ok-nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gear me-1"></i>Staff Tools
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Staff" asp-action="BookManage"><i class="bi bi-book-fill me-2"></i>Manage Books</a></li>
+                                <li><a class="dropdown-item" asp-controller="Staff" asp-action="ReservationsManage"><i class="bi bi-calendar-check me-2"></i>Reservations</a></li>
+                                <li><a class="dropdown-item" asp-controller="Staff" asp-action="BorrowsManage"><i class="bi bi-book me-2"></i>Borrowed Books</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="Staff" asp-action="CheckInRequests"><i class="bi bi-inbox me-2"></i>Check-In Requests</a></li>
+                                <li><a class="dropdown-item" asp-controller="Staff" asp-action="ReturnRequests"><i class="bi bi-inbox-fill me-2"></i>Return Requests</a></li>
+                            </ul>
+                        </li>
+                    }
+
                     <li class="nav-item">
                         <form asp-controller="Account" asp-action="Profile" method="get">
                             @Html.AntiForgeryToken()

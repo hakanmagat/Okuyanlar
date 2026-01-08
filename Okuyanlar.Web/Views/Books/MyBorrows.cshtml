@@ -1,0 +1,104 @@
+@model IEnumerable<Okuyanlar.Core.Entities.BookBorrow>
+@{
+    ViewData["Title"] = "My Borrowed Books";
+}
+
+<div class="container mt-4">
+    <h2>My Borrowed Books</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            You don't have any borrowed books yet.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Borrowed At</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var borrow in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@borrow.Book?.Title</strong><br />
+                                <small>by @borrow.Book?.Author</small>
+                            </td>
+                            <td>@borrow.BorrowedAt.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                @borrow.DueDate.ToLocalTime().ToString("MMM dd, yyyy")
+                                @{
+                                    var daysLeft = (borrow.DueDate - DateTime.UtcNow).Days;
+                                    if (daysLeft >= 0 && (borrow.Status == "Active" || borrow.Status == "ReturnRequested"))
+                                    {
+                                        <br /><small class="text-muted">(@daysLeft days left)</small>
+                                    }
+                                    else if (borrow.Status == "Active")
+                                    {
+                                        <br /><small class="text-danger">(Overdue by @(-daysLeft) days)</small>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                @if (borrow.Status == "Active")
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else if (borrow.Status == "ReturnRequested")
+                                {
+                                    <span class="badge bg-info">Return Requested</span>
+                                }
+                                else if (borrow.Status == "Returned")
+                                {
+                                    <span class="badge bg-secondary">Returned</span>
+                                }
+                                else if (borrow.Status == "Overdue")
+                                {
+                                    <span class="badge bg-danger">Overdue</span>
+                                }
+                                @if (borrow.ReturnedAt.HasValue)
+                                {
+                                    <br /><small class="text-muted">Returned on @borrow.ReturnedAt.Value.ToLocalTime().ToString("MMM dd, yyyy")</small>
+                                }
+                            </td>
+                            <td>
+                                @if ((borrow.Status == "Active" || borrow.Status == "Overdue") && !borrow.ReturnRequested)
+                                {
+                                    <form method="post" action="@Url.Action("RequestReturn", "Books")" style="display: inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="borrowId" value="@borrow.Id" />
+                                        <button type="submit" class="btn btn-sm btn-warning">Request Return</button>
+                                    </form>
+                                }
+                                @if (borrow.ReturnRequested && borrow.Status != "Returned")
+                                {
+                                    <span class="text-muted small">Waiting for librarian approval</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <a href="@Url.Action("Index", "Catalog")" class="btn btn-secondary mt-3">Back to Catalog</a>
+</div>

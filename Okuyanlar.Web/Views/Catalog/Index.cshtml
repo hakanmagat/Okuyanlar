@@ -134,19 +134,33 @@
                                 <!-- Action Section -->
                                 <div class="ok-card ok-mt-3" style="box-shadow: var(--ok-shadow-sm); background: rgba(0,0,0,0.02);">
                                     <div class="ok-card-body">
-                                        @if (item.Stock > 0)
+                                        @if (item.Stock > 0 && item.IsAvailable)
                                         {
                                             <p style="font-weight: 700; color: var(--ok-text); margin-bottom: 0.75rem;">
                                                 <i class="bi bi-check-circle-fill me-2" style="color: var(--ok-success);"></i>
-                                                This book is currently available for borrowing. (@item.Stock in stock)
+                                                This book is currently available for reservation. (@item.Stock in stock)
                                             </p>
 
                                             <div class="ok-flex ok-gap-2 ok-flex-wrap">
-                                                <button class="btn-ok-primary"
-                                                        onclick="OkToast.success('Borrow request sent', 'Request')">
-                                                    <i class="bi bi-journal-check me-2"></i>
-                                                    Borrow Book
-                                                </button>
+                                                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("EndUser"))
+                                                {
+                                                    <form method="post" action="@Url.Action("Reserve", "Books")" style="display: inline;">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="bookId" value="@item.Id" />
+                                                        <input type="hidden" name="hours" value="24" />
+                                                        <button type="submit" class="btn-ok-primary">
+                                                            <i class="bi bi-calendar-check me-2"></i>
+                                                            Reserve Book (24h)
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else if (!User.Identity?.IsAuthenticated == true)
+                                                {
+                                                    <a class="btn-ok-primary" asp-controller="Account" asp-action="Login">
+                                                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                                                        Login to Reserve
+                                                    </a>
+                                                }
 
                                                 <a class="btn-ok-secondary"
                                                    asp-controller="Books" asp-action="Details" asp-route-id="@item.Id">
@@ -159,22 +173,10 @@
                                         {
                                             <p style="font-weight: 700; color: var(--ok-text); margin-bottom: 0.75rem;">
                                                 <i class="bi bi-x-circle-fill me-2" style="color: var(--ok-secondary);"></i>
-                                                This book is currently borrowed by another member.
+                                                This book is currently not available.
                                             </p>
 
                                             <div class="ok-flex ok-gap-2 ok-flex-wrap">
-                                                <button class="btn-ok-primary"
-                                                        onclick="OkToast.info('You are added to the reservation list', 'Reserved')">
-                                                    <i class="bi bi-clock-history me-2"></i>
-                                                    Reserve
-                                                </button>
-
-                                                <button class="btn-ok-secondary"
-                                                        onclick="OkToast.info('You will be notified when available', 'Notification')">
-                                                    <i class="bi bi-bell me-2"></i>
-                                                    Notify Me
-                                                </button>
-
                                                 <a class="btn-ok-secondary"
                                                    asp-controller="Books" asp-action="Details" asp-route-id="@item.Id">
                                                     <i class="bi bi-eye me-2"></i>

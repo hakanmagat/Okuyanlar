@@ -1,0 +1,85 @@
+@model IEnumerable<Okuyanlar.Core.Entities.BookReservation>
+@{
+    ViewData["Title"] = "Manage Reservations";
+}
+
+<div class="container mt-4">
+    <h2>Active Reservations</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            There are no active reservations.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>User</th>
+                        <th>Reserved At</th>
+                        <th>Expires At</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var reservation in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@reservation.Book?.Title</strong><br />
+                                <small>ISBN: @reservation.Book?.ISBN</small>
+                            </td>
+                            <td>
+                                <strong>@reservation.User?.Username</strong><br />
+                                <small>@reservation.User?.Email</small>
+                            </td>
+                            <td>@reservation.ReservedAt.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                @reservation.ExpiresAt.ToLocalTime().ToString("MMM dd, yyyy HH:mm")
+                                @{
+                                    var timeLeft = reservation.ExpiresAt - DateTime.UtcNow;
+                                    if (timeLeft.TotalHours > 0)
+                                    {
+                                        <br /><small class="text-muted">(@((int)timeLeft.TotalHours)h @timeLeft.Minutes m left)</small>
+                                    }
+                                    else
+                                    {
+                                        <br /><small class="text-danger">(Expired)</small>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                @if (reservation.CheckInRequested)
+                                {
+                                    <span class="badge bg-warning">Check-in Requested</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="mt-3">
+        <a href="@Url.Action("CheckInRequests", "Staff")" class="btn btn-primary">View Check-In Requests</a>
+        <a href="@Url.Action("BookManage", "Staff")" class="btn btn-secondary">Back to Book Management</a>
+    </div>
+</div>

@@ -1,0 +1,89 @@
+@model IEnumerable<Okuyanlar.Core.Entities.BookBorrow>
+@{
+    ViewData["Title"] = "Manage Borrowed Books";
+}
+
+<div class="container mt-4">
+    <h2>Active Borrowed Books</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            There are no active borrowed books.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>User</th>
+                        <th>Borrowed At</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var borrow in Model)
+                    {
+                        <tr class="@(borrow.Status == "Overdue" ? "table-danger" : "")">
+                            <td>
+                                <strong>@borrow.Book?.Title</strong><br />
+                                <small>ISBN: @borrow.Book?.ISBN</small>
+                            </td>
+                            <td>
+                                <strong>@borrow.User?.Username</strong><br />
+                                <small>@borrow.User?.Email</small>
+                            </td>
+                            <td>@borrow.BorrowedAt.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                @borrow.DueDate.ToLocalTime().ToString("MMM dd, yyyy")
+                                @{
+                                    var daysLeft = (borrow.DueDate - DateTime.UtcNow).Days;
+                                    if (daysLeft >= 0)
+                                    {
+                                        <br /><small class="text-muted">(@daysLeft days left)</small>
+                                    }
+                                    else
+                                    {
+                                        <br /><small class="text-danger">(Overdue by @(-daysLeft) days)</small>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                @if (borrow.Status == "Active")
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else if (borrow.Status == "Overdue")
+                                {
+                                    <span class="badge bg-danger">Overdue</span>
+                                }
+                                @if (borrow.ReturnRequested)
+                                {
+                                    <br /><span class="badge bg-warning">Return Requested</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="mt-3">
+        <a href="@Url.Action("ReturnRequests", "Staff")" class="btn btn-primary">View Return Requests</a>
+        <a href="@Url.Action("BookManage", "Staff")" class="btn btn-secondary">Back to Book Management</a>
+    </div>
+</div>

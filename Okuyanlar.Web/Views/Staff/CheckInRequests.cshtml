@@ -1,0 +1,95 @@
+@model IEnumerable<Okuyanlar.Core.Entities.BookReservation>
+@{
+    ViewData["Title"] = "Check-In Requests";
+}
+
+<div class="container mt-4">
+    <h2>Check-In Requests</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            There are no pending check-in requests.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>User</th>
+                        <th>Reserved At</th>
+                        <th>Expires At</th>
+                        <th>Requested At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var reservation in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@reservation.Book?.Title</strong><br />
+                                <small>by @reservation.Book?.Author</small><br />
+                                <small>ISBN: @reservation.Book?.ISBN</small>
+                            </td>
+                            <td>
+                                <strong>@reservation.User?.Username</strong><br />
+                                <small>@reservation.User?.Email</small>
+                            </td>
+                            <td>@reservation.ReservedAt.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                @reservation.ExpiresAt.ToLocalTime().ToString("MMM dd, yyyy HH:mm")
+                                @{
+                                    var timeLeft = reservation.ExpiresAt - DateTime.UtcNow;
+                                    if (timeLeft.TotalHours > 0)
+                                    {
+                                        <br /><small class="text-muted">(@((int)timeLeft.TotalHours)h @timeLeft.Minutes m left)</small>
+                                    }
+                                    else
+                                    {
+                                        <br /><small class="text-danger">(Expired)</small>
+                                    }
+                                }
+                            </td>
+                            <td>@reservation.CheckInRequestedAt?.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                @if (DateTime.UtcNow <= reservation.ExpiresAt)
+                                {
+                                    <form method="post" action="@Url.Action("AcceptCheckIn", "Staff")" style="display: inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="reservationId" value="@reservation.Id" />
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" name="borrowDays" value="14" min="1" max="90" class="form-control" style="width: 70px;" />
+                                            <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                                        </div>
+                                        <small class="text-muted">days to borrow</small>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-danger">Expired</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="mt-3">
+        <a href="@Url.Action("ReservationsManage", "Staff")" class="btn btn-secondary">Back to Reservations</a>
+    </div>
+</div>
