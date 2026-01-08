@@ -13,6 +13,51 @@
     var canListUsers = Model.Role == UserRole.Admin || Model.Role == UserRole.SystemAdmin;
 }
 
+<style>
+    /* Custom Modal Design (Independent of OkModal) */
+    .ok-custom-modal {
+        display: none; position: fixed; z-index: 9999; left: 0; top: 0;
+        width: 100%; height: 100%; background-color: rgba(40,29,22,0.5);
+        backdrop-filter: blur(4px); align-items: center; justify-content: center;
+    }
+    .ok-custom-modal.active { display: flex; }
+    
+    .ok-custom-modal-content {
+        background: #fdfaf3; border-radius: 24px; width: 90%; max-width: 550px;
+        max-height: 85vh; overflow: hidden; position: relative;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid var(--ok-border);
+        display: flex; flex-direction: column;
+    }
+    
+    .ok-custom-modal-header {
+        padding: 1.5rem; border-bottom: 1px solid var(--ok-border);
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    
+    .ok-custom-modal-title { font-weight: 900; font-size: 1.25rem; color: var(--ok-title); }
+    
+    .ok-custom-modal-close {
+        background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--ok-title);
+        width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s;
+    }
+    .ok-custom-modal-close:hover { background: rgba(0,0,0,0.05); }
+
+    .ok-custom-modal-body { padding: 1.5rem; overflow-y: auto; flex-grow: 1; }
+
+    /* User Card Styles */
+    .user-list-item {
+        background: var(--ok-bg); border: 1px solid var(--ok-border);
+        border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 0.75rem;
+        display: flex; justify-content: space-between; align-items: center;
+        transition: transform 0.2s;
+    }
+    .user-list-item:hover { transform: translateY(-2px); }
+    .user-list-info { display: flex; flex-direction: column; gap: 2px; }
+    .user-list-name { font-weight: 800; color: var(--ok-title); font-size: 1.05rem; }
+    .user-list-email { font-size: 0.85rem; opacity: 0.7; font-weight: 600; }
+</style>
+
 <form id="afTokenForm" style="display:none;">
     @Html.AntiForgeryToken()
 </form>
@@ -20,22 +65,15 @@
 <div class="container" style="max-width: 1100px; padding-top: 2.5rem;">
     <div class="ok-card">
         <div class="ok-card-body">
-
+            @* Top Section: User Information and Buttons *@
             <div class="ok-flex ok-justify-between ok-items-center" style="gap:1rem; flex-wrap:wrap;">
                 <div>
                     <div style="display:flex; align-items:center; gap:.75rem;">
-                        <div style="
-                            width:54px; height:54px; border-radius:16px;
-                            background: var(--ok-bg);
-                            border: 1px solid var(--ok-border);
-                            display:flex; align-items:center; justify-content:center;">
+                        <div style="width:54px; height:54px; border-radius:16px; background: var(--ok-bg); border: 1px solid var(--ok-border); display:flex; align-items:center; justify-content:center;">
                             <i class="bi bi-person-fill" style="font-size:1.4rem;"></i>
                         </div>
-
                         <div>
-                            <div style="font-weight:900; font-size:1.35rem; color: var(--ok-title); line-height:1.1;">
-                                @Model.Username
-                            </div>
+                            <div style="font-weight:900; font-size:1.35rem; color: var(--ok-title); line-height:1.1;">@Model.Username</div>
                             <div style="opacity:.75; font-weight:700;">
                                 @Model.Email
                                 <span class="ok-badge ok-badge-secondary" style="margin-left:.5rem;">@role</span>
@@ -45,236 +83,89 @@
                 </div>
 
                 <div class="ok-flex ok-gap-2" style="flex-wrap:wrap;">
-                    <button type="button" class="btn-ok-accent" id="btnChangePassword">
-                        <i class="bi bi-key-fill me-2"></i> Change Password
-                    </button>
-
-                    @if (role == "Librarian" || role == "Admin" || role == "SystemAdmin")
-                    {
-                        <a class="btn-ok-primary" asp-controller="Staff" asp-action="BookManage">
-                            <i class="bi bi-book-fill me-2"></i> Manage Books
-                        </a>
+                    <button type="button" class="btn-ok-accent" id="btnChangePassword"><i class="bi bi-key-fill me-2"></i> Change Password</button>
+                    @if (role == "Librarian" || role == "Admin" || role == "SystemAdmin") {
+                        <a class="btn-ok-primary" asp-controller="Staff" asp-action="BookManage"><i class="bi bi-book-fill me-2"></i> Manage Books</a>
                     }
-
-                    @if (canCreateUser)
-                    {
-                        <button type="button" class="btn-ok-secondary" id="btnCreateUser">
-                            <i class="bi bi-person-plus-fill me-2"></i> Create User
-                        </button>
+                    @if (canCreateUser) {
+                        <button type="button" class="btn-ok-secondary" id="btnCreateUser"><i class="bi bi-person-plus-fill me-2"></i> Create User</button>
                     }
-
-                    @if (canListUsers)
-                    {
-                        <button type="button" class="btn-ok-secondary" id="btnListUsers">
-                            <i class="bi bi-people-fill me-2"></i> List Users
-                        </button>
+                    @if (canListUsers) {
+                        <button type="button" class="btn-ok-secondary" id="btnListUsers"><i class="bi bi-people-fill me-2"></i> List Users</button>
                     }
-
-                    <a class="btn-ok-secondary" asp-controller="Home" asp-action="Index">
-                        <i class="bi bi-house-door me-2"></i> Home
-                    </a>
+                    <a class="btn-ok-secondary" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door me-2"></i> Home</a>
                 </div>
             </div>
 
             <hr style="border-color: var(--ok-border); margin: 1.5rem 0;" />
-            
+
+            @* Borrow and Lists Section *@
+
             <div class="ok-mt-4 ok-grid ok-grid-2">
                 <div class="ok-card">
-                    <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;">
-                        <i class="bi bi-bag-check-fill"></i>
-                        <span>My Books / Borrowed Items</span>
-                    </div>
+                    <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;"><i class="bi bi-bag-check-fill"></i> <span>My Books / Borrowed Items</span></div>
                     <div class="ok-card-body">
-                        <div style="
-                            border: 1px dashed rgba(40,29,22,.25);
-                            border-radius: 14px;
-                            padding: 1.25rem;
-                            background: rgba(243,231,203,.35);
-                            font-weight:700;
-                            opacity:.85;">
+                        <div style="border: 1px dashed rgba(40,29,22,.25); border-radius: 14px; padding: 1.25rem; background: rgba(243,231,203,.35); font-weight:700; opacity:.85;">
                             There are no active loans right now. When you borrow a book, you will see its due date and late notices here.
                         </div>
                     </div>
                 </div>
-
                 <div class="ok-card">
-                    <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;">
-                        <i class="bi bi-bookmark-star-fill"></i>
-                        <span>My Lists</span>
-                    </div>
+                    <div class="ok-card-header" style="display:flex; align-items:center; gap:.65rem;"><i class="bi bi-bookmark-star-fill"></i> <span>My Lists</span></div>
                     <div class="ok-card-body">
                         <div class="ok-flex ok-flex-col ok-gap-2">
                             <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
-                                <div style="font-weight:800;">
-                                    <i class="bi bi-eye me-2"></i> Notify Me list
-                                </div>
+                                <div style="font-weight:800;"><i class="bi bi-eye me-2"></i> Notify Me list</div>
                                 <span class="ok-badge ok-badge-secondary">0</span>
                             </div>
-
                             <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
-                                <div style="font-weight:800;">
-                                    <i class="bi bi-bookmark-check me-2"></i> Reserved list
-                                </div>
+                                <div style="font-weight:800;"><i class="bi bi-bookmark-check me-2"></i> Reserved list</div>
                                 <span class="ok-badge ok-badge-secondary">0</span>
                             </div>
-
-                            <div class="ok-flex ok-justify-between ok-items-center" style="background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 14px; padding: .9rem 1rem;">
-                                <div style="font-weight:800;">
-                                    <i class="bi bi-journal-bookmark-fill me-2"></i> Reading list
-                                </div>
-                                <span class="ok-badge ok-badge-secondary">0</span>
-                            </div>
-                        </div>
-
-                        <div class="text-muted" style="margin-top: .9rem; font-weight:600;">
-                            Note: These sections will auto-populate once the backend is connected.
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
+    </div>
+</div>
+
+<div id="customUserModal" class="ok-custom-modal">
+    <div class="ok-custom-modal-content">
+        <div class="ok-custom-modal-header">
+            <div class="ok-custom-modal-title">Registered Users</div>
+            <button class="ok-custom-modal-close" id="closeCustomModal">&times;</button>
+        </div>
+        <div class="ok-custom-modal-body" id="customModalBody">
+            </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        // ---- Helpers
         const allowedRoles = @Html.Raw(JsonSerializer.Serialize(allowedRoles));
 
         function getAntiForgeryToken() {
-            const input = document.querySelector('input[name="__RequestVerificationToken"]');
-            return input ? input.value : "";
+            return document.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
         }
 
         async function postForm(url, formId) {
             const form = document.getElementById(formId);
             const fd = new FormData(form);
-
-            const res = await fetch(url, {
-                method: "POST",
-                body: fd,
-                headers: { "X-Requested-With": "XMLHttpRequest" }
-            });
-
+            const res = await fetch(url, { method: "POST", body: fd, headers: { "X-Requested-With": "XMLHttpRequest" } });
             const text = await res.text();
             if (!res.ok) throw new Error(text || "Operation failed.");
             return text;
         }
 
-        // ---- Change Password (Modal A)
-        document.getElementById("btnChangePassword")?.addEventListener("click", () => {
-            const formHtml = `
-                <form id="cpForm" class="ok-flex ok-flex-col ok-gap-2">
-                    <input type="hidden" name="__RequestVerificationToken" value="${getAntiForgeryToken()}" />
+        // ---- Modal Controls
+        const customModal = document.getElementById("customUserModal");
+        const customModalBody = document.getElementById("customModalBody");
+        
+        document.getElementById("closeCustomModal").onclick = () => customModal.classList.remove("active");
+        window.onclick = (event) => { if (event.target == customModal) customModal.classList.remove("active"); }
 
-                    <div>
-                        <label class="ok-form-label">Current password</label>
-                        <div class="ok-input-group">
-                            <span class="ok-input-group-text"><i class="bi bi-lock"></i></span>
-                            <input class="ok-form-control" type="password" name="CurrentPassword" required />
-                        </div>
-                    </div>
-
-                    <div class="ok-mt-1">
-                        <label class="ok-form-label">New password</label>
-                        <div class="ok-input-group">
-                            <span class="ok-input-group-text"><i class="bi bi-shield-lock"></i></span>
-                            <input class="ok-form-control" type="password" name="NewPassword" required minlength="8" />
-                        </div>
-                    </div>
-
-                    <div class="ok-mt-1">
-                        <label class="ok-form-label">New password (again)</label>
-                        <div class="ok-input-group">
-                            <span class="ok-input-group-text"><i class="bi bi-shield-check"></i></span>
-                            <input class="ok-form-control" type="password" name="ConfirmNewPassword" required minlength="8" />
-                        </div>
-                    </div>
-
-                    <div class="text-muted" style="font-weight:600; margin-top:.25rem;">
-                        Minimum 8 characters recommended.
-                    </div>
-                </form>
-            `;
-
-            OkModal.create({
-                title: "Change Password",
-                content: formHtml,
-                confirmText: "Update",
-                cancelText: "Cancel",
-                onConfirm: async () => {
-                    try {
-                        await postForm("@Url.Action("ChangePassword", "Account")", "cpForm");
-                        OkToast.success("Password updated.", "Success");
-                    } catch (e) {
-                        OkToast.error(e.message || "Password could not be updated.", "Error");
-                    }
-                }
-            });
-        });
-
-        // ---- Create User (roles that are allowed) - Modal A
-        document.getElementById("btnCreateUser")?.addEventListener("click", () => {
-            if (!allowedRoles || !allowedRoles.length) {
-                OkToast.error("You do not have permission for this action.", "Error");
-                return;
-            }
-
-            const roleOptions = allowedRoles
-                .map(r => `<option value="${r}">${r}</option>`)
-                .join("");
-
-            const formHtml = `
-                <form id="cuForm" class="ok-flex ok-flex-col ok-gap-2">
-                    <input type="hidden" name="__RequestVerificationToken" value="${getAntiForgeryToken()}" />
-
-                    <div>
-                        <label class="ok-form-label">Username</label>
-                        <div class="ok-input-group">
-                            <span class="ok-input-group-text"><i class="bi bi-person"></i></span>
-                            <input class="ok-form-control" name="Username" required />
-                        </div>
-                    </div>
-
-                    <div class="ok-mt-1">
-                        <label class="ok-form-label">Email</label>
-                        <div class="ok-input-group">
-                            <span class="ok-input-group-text"><i class="bi bi-envelope"></i></span>
-                            <input class="ok-form-control" type="email" name="Email" required />
-                        </div>
-                    </div>
-
-                    <div class="ok-mt-1">
-                        <label class="ok-form-label">Role</label>
-                        <select class="ok-form-control" name="Role" required>
-                            ${roleOptions}
-                        </select>
-                    </div>
-
-                    <div class="text-muted" style="font-weight:600; margin-top:.25rem;">
-                        After the user is created, a password creation email can be sent.
-                    </div>
-                </form>
-            `;
-
-            OkModal.create({
-                title: "Create new user",
-                content: formHtml,
-                confirmText: "Create",
-                cancelText: "Cancel",
-                onConfirm: async () => {
-                    try {
-                        await postForm("@Url.Action("UserCreateModal", "Staff")", "cuForm");
-                        OkToast.success("User created.", "Success");
-                    } catch (e) {
-                        OkToast.error(e.message || "User could not be created.", "Error");
-                    }
-                }
-            });
-        });
-
-        // ---- List Users (Admin/SystemAdmin) - Modal A
+        // ---- List Users 
         document.getElementById("btnListUsers")?.addEventListener("click", async () => {
             try {
                 const res = await fetch("@Url.Action("ListUsers", "Account")", {
@@ -282,18 +173,84 @@
                     headers: { "X-Requested-With": "XMLHttpRequest" }
                 });
                 const html = await res.text();
-                if (!res.ok) throw new Error(html || "List could not be retrieved.");
+                if (!res.ok) throw new Error("List could not be retrieved.");
 
-                OkModal.create({
-                    title: "Users",
-                    content: html,
-                    confirmText: "Close",
-                    cancelText: "" // leave empty if cancel button is not desired
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const rows = doc.querySelectorAll('tr');
+                
+                let cardsHtml = "";
+                rows.forEach(row => {
+                    const cols = row.querySelectorAll('td');
+                    if (cols.length >= 3) {
+                        const name = cols[0].innerText.trim();
+                        const email = cols[1].innerText.trim();
+                        const roleName = cols[2].innerText.trim();
+                        if (name.toLowerCase() === "username") return;
+
+                        cardsHtml += `
+                            <div class="user-list-item">
+                                <div class="user-list-info">
+                                    <div class="user-list-name">${name}</div>
+                                    <div class="user-list-email">${email}</div>
+                                </div>
+                                <span class="ok-badge ok-badge-secondary">${roleName}</span>
+                            </div>
+                        `;
+                    }
                 });
+
+                customModalBody.innerHTML = cardsHtml || html; // If no cards, show raw HTML
+                customModal.classList.add("active");
+
             } catch (e) {
-                OkToast.error(e.message || "List could not be retrieved.", "Error");
+                OkToast.error(e.message || "Error", "Error");
             }
         });
 
+        document.getElementById("btnChangePassword")?.addEventListener("click", () => {
+            const formHtml = `<form id="cpForm" class="ok-flex ok-flex-col ok-gap-2">
+                <input type="hidden" name="__RequestVerificationToken" value="${getAntiForgeryToken()}" />
+                <div><label class="ok-form-label">Current password</label><input class="ok-form-control" type="password" name="CurrentPassword" required /></div>
+                <div><label class="ok-form-label">New password</label><input class="ok-form-control" type="password" name="NewPassword" required minlength="8" /></div>
+                <div><label class="ok-form-label">New password (again)</label><input class="ok-form-control" type="password" name="ConfirmNewPassword" required minlength="8" /></div>
+            </form>`;
+
+            OkModal.create({
+                title: "Change Password",
+                content: formHtml,
+                confirmText: "Update",
+                onConfirm: async () => {
+                    try {
+                        await postForm("@Url.Action("ChangePassword", "Account")", "cpForm");
+                        OkToast.success("Password updated.");
+                    } catch (e) { OkToast.error(e.message); }
+                }
+            });
+        });
+
+        // ---- Create User
+        document.getElementById("btnCreateUser")?.addEventListener("click", () => {
+            if (!allowedRoles || !allowedRoles.length) return;
+            const roleOptions = allowedRoles.map(r => `<option value="${r}">${r}</option>`).join("");
+            const formHtml = `<form id="cuForm" class="ok-flex ok-flex-col ok-gap-2">
+                <input type="hidden" name="__RequestVerificationToken" value="${getAntiForgeryToken()}" />
+                <div><label class="ok-form-label">Username</label><input class="ok-form-control" name="Username" required /></div>
+                <div><label class="ok-form-label">Email</label><input class="ok-form-control" type="email" name="Email" required /></div>
+                <div><label class="ok-form-label">Role</label><select class="ok-form-control" name="Role" required>${roleOptions}</select></div>
+            </form>`;
+
+            OkModal.create({
+                title: "Create User",
+                content: formHtml,
+                confirmText: "Create",
+                onConfirm: async () => {
+                    try {
+                        await postForm("@Url.Action("UserCreateModal", "Staff")", "cuForm");
+                        OkToast.success("User created.");
+                    } catch (e) { OkToast.error(e.message); }
+                }
+            });
+        });
     </script>
 }
