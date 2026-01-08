@@ -388,6 +388,8 @@ namespace Okuyanlar.Web.Controllers
                 book.Stock = model.Stock;
                 book.IsActive = model.IsActive;
                 book.Category = model.Category;
+                book.ShelfLocation = model.ShelfLocation;
+                book.Description = model.Description;
 
                 _bookRepository.Update(book);
                 TempData["SuccessMessage"] = $"Book '{book.Title}' has been updated.";

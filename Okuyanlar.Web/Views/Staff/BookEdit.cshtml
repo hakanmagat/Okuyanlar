@@ -80,6 +80,15 @@
 
                             <div class="row">
                                 <div class="col-md-12 ok-mb-3">
+                                    <label asp-for="Description" class="ok-form-label">Description (optional)</label>
+                                    <textarea asp-for="Description" class="ok-form-control" rows="4" placeholder="Brief description or synopsis of the book..."></textarea>
+                                    <small style="opacity:.75; font-weight:800;">A detailed description or synopsis of the book</small>
+                                    <span asp-validation-for="Description" class="text-danger small" style="font-weight:800;"></span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 ok-mb-3">
                                     <label class="ok-form-label">Cover Image</label>
                                     <div class="ok-flex ok-gap-3 ok-flex-wrap ok-items-center">
                                         @if (!string.IsNullOrWhiteSpace(Model.CoverUrl))

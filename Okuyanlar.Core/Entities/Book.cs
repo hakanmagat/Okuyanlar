@@ -55,5 +55,10 @@ namespace Okuyanlar.Core.Entities
     /// Physical location of the book in the library (e.g., shelf number, section).
     /// </summary>
     public string? ShelfLocation { get; set; }
+
+    /// <summary>
+    /// A detailed description or synopsis of the book.
+    /// </summary>
+    public string? Description { get; set; }
   }
 }

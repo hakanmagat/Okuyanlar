@@ -44,6 +44,16 @@
                             </span>
                         </div>
 
+                        @if (!string.IsNullOrWhiteSpace(Model.Description))
+                        {
+                            <div class="ok-mb-3" style="margin-top: 1.5rem;">
+                                <h3 style="font-weight:800; color: var(--ok-title); margin-bottom:.75rem; font-size: 1.25rem;">
+                                    <i class="bi bi-card-text me-2"></i>Description
+                                </h3>
+                                <p style="font-weight:600; color: var(--ok-text); line-height:1.6; white-space: pre-wrap;">@Model.Description</p>
+                            </div>
+                        }
+
                         <hr style="border: 0; border-top: 1px solid var(--ok-border); margin: 1.5rem 0;">
 
                         <div class="ok-card ok-mt-3" style="box-shadow: var(--ok-shadow-sm); background: rgba(0,0,0,0.02);">
