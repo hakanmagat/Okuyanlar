@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Okuyanlar.Core.Interfaces;
 using Okuyanlar.Core.Enums;
+using Okuyanlar.Core.Extensions;
 using Okuyanlar.Service.Services;
 using Okuyanlar.Web.Models;
 using Okuyanlar.Web.Services;
@@ -214,7 +215,7 @@ namespace Okuyanlar.Web.Controllers
 
             var allowedRoles = _userService
                 .GetCreatableRoles(user.Role)
-                .Select(r => r.ToString())
+                .Select(r => r.GetDisplayName())
                 .ToList();
 
             ViewBag.AllowedRoles = allowedRoles;

@@ -1,14 +1,16 @@
 @using Okuyanlar.Core.Entities
+@using Okuyanlar.Core.Extensions
+@using Okuyanlar.Core.Enums
 @using System.Linq
 @using System.Text.Json
 @model User
 
 @{
     ViewData["Title"] = "Profile";
-    var role = Model.Role.ToString();
+    var role = Model.Role.GetDisplayName();
     var allowedRoles = (IEnumerable<string>)(ViewBag.AllowedRoles ?? Enumerable.Empty<string>());
     var canCreateUser = (ViewBag.CanCreateUser as bool?) ?? allowedRoles.Any();
-    var canListUsers = role == "Admin" || role == "SystemAdmin";
+    var canListUsers = Model.Role == UserRole.Admin || Model.Role == UserRole.SystemAdmin;
 }
 
 <form id="afTokenForm" style="display:none;">

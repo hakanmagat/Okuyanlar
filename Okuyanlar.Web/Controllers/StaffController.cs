@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Okuyanlar.Core.Entities;
 using Okuyanlar.Core.Enums;
+using Okuyanlar.Core.Extensions;
 using Okuyanlar.Core.Interfaces;
 using Okuyanlar.Service.Services;
 using Okuyanlar.Web.Models;
@@ -66,7 +67,7 @@ namespace Okuyanlar.Web.Controllers
                 AllowedRoles = allowed
                     .Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
                     {
-                        Text = r.ToString(),
+                        Text = r.GetDisplayName(),
                         Value = r.ToString()
                     })
                     .ToList()
@@ -136,7 +137,7 @@ namespace Okuyanlar.Web.Controllers
                 AllowedRoles = allowed
                     .Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
                     {
-                        Text = r.ToString(),
+                        Text = r.GetDisplayName(),
                         Value = r.ToString()
                     })
                     .ToList()
@@ -165,7 +166,7 @@ namespace Okuyanlar.Web.Controllers
                 ModelState.AddModelError(string.Empty, "You cannot create this role.");
                 model.AllowedRoles = allowed.Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
                 {
-                    Text = r.ToString(),
+                    Text = r.GetDisplayName(),
                     Value = r.ToString()
                 }).ToList();
                 return View("~/Views/Staff/UserCreate.cshtml", model);
@@ -175,7 +176,7 @@ namespace Okuyanlar.Web.Controllers
             {
                 model.AllowedRoles = allowed.Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
                 {
-                    Text = r.ToString(),
+                    Text = r.GetDisplayName(),
                     Value = r.ToString()
                 }).ToList();
                 return View("~/Views/Staff/UserCreate.cshtml", model);
@@ -187,7 +188,7 @@ namespace Okuyanlar.Web.Controllers
                 ModelState.AddModelError(string.Empty, "User not found.");
                 model.AllowedRoles = allowed.Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
                 {
-                    Text = r.ToString(),
+                    Text = r.GetDisplayName(),
                     Value = r.ToString()
                 }).ToList();
                 return View("~/Views/Staff/UserCreate.cshtml", model);

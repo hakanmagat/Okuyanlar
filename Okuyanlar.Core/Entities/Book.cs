@@ -50,5 +50,10 @@ namespace Okuyanlar.Core.Entities
     /// The number of ratings this book has received.
     /// </summary>
     public int RatingCount { get; set; } = 0;
+
+    /// <summary>
+    /// Physical location of the book in the library (e.g., shelf number, section).
+    /// </summary>
+    public string? ShelfLocation { get; set; }
   }
 }
