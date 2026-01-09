@@ -118,11 +118,29 @@
                                         This book is currently available for borrowing.
                                     </p>
 
-                                    <button class="btn-ok-primary ok-mt-2"
-                                            onclick="OkToast.success('Borrow request sent', 'Request')">
-                                        <i class="bi bi-journal-check me-2"></i>
-                                        Borrow Book
-                                    </button>
+                                    @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("EndUser"))
+                                    {
+                                        <div class="ok-flex ok-gap-2 ok-flex-wrap ok-mt-2">
+                                            <button class="btn-ok-primary"
+                                                    onclick="OkToast.success('Borrow request sent', 'Request')">
+                                                <i class="bi bi-journal-check me-2"></i>
+                                                Borrow Book
+                                            </button>
+
+                                            <button class="btn-ok-primary"
+                                                    onclick="OkToast.info('You are added to the reservation list', 'Reserved')">
+                                                <i class="bi bi-clock-history me-2"></i>
+                                                Reserve
+                                            </button>
+                                        </div>
+                                    }
+                                    else if (!User?.Identity?.IsAuthenticated == true)
+                                    {
+                                        <a asp-controller="Account" asp-action="Login" class="btn-ok-primary ok-mt-2">
+                                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                                            Login to Borrow or Reserve
+                                        </a>
+                                    }
                                 }
                                 else
                                 {
@@ -131,20 +149,6 @@
                                     <p class="ok-mt-2" style="font-weight:700; color: var(--ok-text);">
                                         This book is currently borrowed by another member.
                                     </p>
-
-                                    <div class="ok-flex ok-gap-2 ok-flex-wrap">
-                                        <button class="btn-ok-primary"
-                                                onclick="OkToast.info('You are added to the reservation list', 'Reserved')">
-                                            <i class="bi bi-clock-history me-2"></i>
-                                            Reserve
-                                        </button>
-
-                                        <button class="btn-ok-secondary"
-                                                onclick="OkToast.info('You will be notified when available', 'Notification')">
-                                            <i class="bi bi-bell me-2"></i>
-                                            Notify Me
-                                        </button>
-                                    </div>
                                 }
                             </div>
                         </div>

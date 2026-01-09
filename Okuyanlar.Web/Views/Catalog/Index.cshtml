@@ -138,19 +138,24 @@
                                         {
                                             <p style="font-weight: 700; color: var(--ok-text); margin-bottom: 0.75rem;">
                                                 <i class="bi bi-check-circle-fill me-2" style="color: var(--ok-success);"></i>
-                                                This book is currently available for reservation. (@item.Stock in stock)
+                                                This book is currently available. (@item.Stock in stock)
                                             </p>
 
                                             <div class="ok-flex ok-gap-2 ok-flex-wrap">
                                                 @if (User.Identity?.IsAuthenticated == true && User.IsInRole("EndUser"))
                                                 {
+                                                    <button class="btn-ok-primary" onclick="OkToast.success('Borrow request sent', 'Request')">
+                                                        <i class="bi bi-journal-check me-2"></i>
+                                                        Borrow Book
+                                                    </button>
+
                                                     <form method="post" action="@Url.Action("Reserve", "Books")" style="display: inline;">
                                                         @Html.AntiForgeryToken()
                                                         <input type="hidden" name="bookId" value="@item.Id" />
                                                         <input type="hidden" name="hours" value="24" />
                                                         <button type="submit" class="btn-ok-primary">
-                                                            <i class="bi bi-calendar-check me-2"></i>
-                                                            Reserve Book (24h)
+                                                            <i class="bi bi-clock-history me-2"></i>
+                                                            Reserve Book
                                                         </button>
                                                     </form>
                                                 }
@@ -158,7 +163,7 @@
                                                 {
                                                     <a class="btn-ok-primary" asp-controller="Account" asp-action="Login">
                                                         <i class="bi bi-box-arrow-in-right me-2"></i>
-                                                        Login to Reserve
+                                                        Login to Borrow or Reserve
                                                     </a>
                                                 }
 
