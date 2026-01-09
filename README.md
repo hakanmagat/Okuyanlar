@@ -35,7 +35,7 @@ The solution is divided into the following specialized projects:
     * **Contents:** xUnit tests covering unit and integration scenarios following the TDD cycle.
 
 ## Technologies & Methodologies
-* **Framework:** .NET 9 (ASP.NET Core)
+* **Framework:** .NET 10 (ASP.NET Core)
 * **Language:** C#
 * **Database:** SQLite (Entity Framework Core)
 * **Testing:** xUnit
