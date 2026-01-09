@@ -89,8 +89,41 @@
                             <div class="row">
                                 <div class="col-md-12 ok-mb-3">
                                     <label class="ok-form-label">Cover Image (optional)</label>
-                                    <input type="file" name="coverImage" class="ok-form-control" accept="image/*" />
-                                    <small style="opacity:.75; font-weight:800;">Allowed: .jpg, .jpeg, .png, .gif, .webp • Max 5 MB</small>
+                                    
+                                    <!-- Image Source Toggle -->
+                                    <div class="ok-card ok-mb-3" style="box-shadow: var(--ok-shadow-sm); border-radius:14px;">
+                                        <div class="ok-card-body" style="padding: 1rem 1.25rem;">
+                                            <div class="ok-flex ok-items-center ok-justify-between ok-flex-wrap ok-gap-2">
+                                                <div>
+                                                    <div style="font-weight:900; color:var(--ok-title);">
+                                                        Image Source
+                                                    </div>
+                                                    <div style="opacity:.8; font-weight:700; font-size:.9rem;">
+                                                        Choose between uploading a file or providing a URL
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-check form-switch" style="margin:0;">
+                                                    <input type="checkbox" class="form-check-input" id="useUrlSwitch" />
+                                                    <label class="form-check-label" for="useUrlSwitch" style="font-weight:800;">
+                                                        Use URL
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- File Upload Section -->
+                                    <div id="uploadSection">
+                                        <input type="file" name="coverImage" id="coverImageFile" class="ok-form-control" accept="image/*" />
+                                        <small style="opacity:.75; font-weight:800;">Allowed: .jpg, .jpeg, .png, .gif, .webp • Max 5 MB</small>
+                                    </div>
+
+                                    <!-- URL Input Section -->
+                                    <div id="urlSection" style="display:none;">
+                                        <input type="url" name="coverImageUrl" id="coverImageUrl" class="ok-form-control" placeholder="https://example.com/image.jpg" />
+                                        <small style="opacity:.75; font-weight:800;">Enter a direct URL to an image (must start with http:// or https://)</small>
+                                    </div>
                                 </div>
                             </div>
 
@@ -145,10 +178,30 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Optional: add validation + loading + toast on submit
+        // Toggle between file upload and URL input
         document.addEventListener("DOMContentLoaded", function () {
             var form = document.getElementById("bookCreateForm");
             if (!form) return;
+
+            var useUrlSwitch = document.getElementById("useUrlSwitch");
+            var uploadSection = document.getElementById("uploadSection");
+            var urlSection = document.getElementById("urlSection");
+            var fileInput = document.getElementById("coverImageFile");
+            var urlInput = document.getElementById("coverImageUrl");
+
+            useUrlSwitch.addEventListener("change", function () {
+                if (this.checked) {
+                    uploadSection.style.display = "none";
+                    urlSection.style.display = "block";
+                    fileInput.value = "";
+                    fileInput.removeAttribute("required");
+                } else {
+                    uploadSection.style.display = "block";
+                    urlSection.style.display = "none";
+                    urlInput.value = "";
+                    urlInput.removeAttribute("required");
+                }
+            });
 
             form.addEventListener("submit", function (e) {
                 if (window.OkValidation && !OkValidation.validate(form)) {

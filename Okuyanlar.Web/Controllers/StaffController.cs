@@ -226,7 +226,7 @@ namespace Okuyanlar.Web.Controllers
         [Authorize(Roles = "Librarian")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult BookCreate(Book model, IFormFile? coverImage)
+        public IActionResult BookCreate(Book model, IFormFile? coverImage, string? coverImageUrl)
         {
             if (!ModelState.IsValid)
             {
@@ -243,8 +243,21 @@ namespace Okuyanlar.Web.Controllers
 
             try
             {
+                // Handle cover image from URL
+                if (!string.IsNullOrWhiteSpace(coverImageUrl))
+                {
+                    // Validate URL format
+                    if (!Uri.TryCreate(coverImageUrl, UriKind.Absolute, out var uriResult) ||
+                        (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
+                    {
+                        ModelState.AddModelError(string.Empty, "Invalid URL format. URL must start with http:// or https://");
+                        return View("~/Views/Staff/BookCreate.cshtml", model);
+                    }
+
+                    model.CoverUrl = coverImageUrl;
+                }
                 // Handle optional cover image upload
-                if (coverImage != null && coverImage.Length > 0)
+                else if (coverImage != null && coverImage.Length > 0)
                 {
                     var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                     var ext = Path.GetExtension(coverImage.FileName).ToLowerInvariant();
@@ -312,7 +325,7 @@ namespace Okuyanlar.Web.Controllers
         [Authorize(Roles = "Librarian")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult BookEdit(Book model, IFormFile? coverImage)
+        public IActionResult BookEdit(Book model, IFormFile? coverImage, string? coverImageUrl)
         {
             if (!ModelState.IsValid)
             {
@@ -335,8 +348,36 @@ namespace Okuyanlar.Web.Controllers
 
             try
             {
+                // Handle cover image from URL
+                if (!string.IsNullOrWhiteSpace(coverImageUrl))
+                {
+                    // Validate URL format
+                    if (!Uri.TryCreate(coverImageUrl, UriKind.Absolute, out var uriResult) ||
+                        (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
+                    {
+                        ModelState.AddModelError(string.Empty, "Invalid URL format. URL must start with http:// or https://");
+                        return View("~/Views/Staff/BookEdit.cshtml", model);
+                    }
+
+                    // Remove old uploaded file if it exists and switching to URL
+                    var isOldCoverExternal = !string.IsNullOrWhiteSpace(book.CoverUrl) && 
+                                            (book.CoverUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                                             book.CoverUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase));
+                    
+                    if (!isOldCoverExternal && !string.IsNullOrWhiteSpace(book.CoverUrl))
+                    {
+                        var oldPath = book.CoverUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
+                        var fullOldPath = Path.Combine(_env.WebRootPath, oldPath);
+                        if (System.IO.File.Exists(fullOldPath) && fullOldPath.Contains(Path.Combine(_env.WebRootPath, "images", "covers")))
+                        {
+                            System.IO.File.Delete(fullOldPath);
+                        }
+                    }
+
+                    book.CoverUrl = coverImageUrl;
+                }
                 // Handle optional cover image upload
-                if (coverImage != null && coverImage.Length > 0)
+                else if (coverImage != null && coverImage.Length > 0)
                 {
                     var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                     var ext = Path.GetExtension(coverImage.FileName).ToLowerInvariant();
@@ -367,8 +408,12 @@ namespace Okuyanlar.Web.Controllers
                         coverImage.CopyTo(stream);
                     }
 
-                    // Optional cleanup: remove old cover if it was inside covers dir
-                    if (!string.IsNullOrWhiteSpace(book.CoverUrl))
+                    // Optional cleanup: remove old cover if it was inside covers dir and not external
+                    var isOldCoverExternalUpload = !string.IsNullOrWhiteSpace(book.CoverUrl) && 
+                                                  (book.CoverUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                                                   book.CoverUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase));
+                    
+                    if (!isOldCoverExternalUpload && !string.IsNullOrWhiteSpace(book.CoverUrl))
                     {
                         var oldPath = book.CoverUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
                         var fullOldPath = Path.Combine(_env.WebRootPath, oldPath);

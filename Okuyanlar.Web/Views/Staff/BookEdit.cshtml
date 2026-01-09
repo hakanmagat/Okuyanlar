@@ -90,21 +90,26 @@
                             <div class="row">
                                 <div class="col-md-12 ok-mb-3">
                                     <label class="ok-form-label">Cover Image</label>
-                                    <div class="ok-flex ok-gap-3 ok-flex-wrap ok-items-center">
-                                        @if (!string.IsNullOrWhiteSpace(Model.CoverUrl))
-                                        {
+
+                                    <!-- Current Image Preview -->
+                                    @if (!string.IsNullOrWhiteSpace(Model.CoverUrl))
+                                    {
+                                        <div class="ok-flex ok-gap-3 ok-flex-wrap ok-items-center ok-mb-3">
                                             <img src="@Model.CoverUrl" alt="@Model.Title cover" style="width:120px; height:160px; object-fit:cover; border-radius:8px;" onerror="this.src='/images/book-placeholder.jpg'" />
-                                        }
-                                        else
-                                        {
-                                            <div class="ok-no-image ok-no-image-border" style="width:120px; height:160px; border-radius:8px; font-size:.8rem;">NO IMAGE</div>
-                                        }
-                                        <div style="flex:1; min-width:220px;">
-                                            <input type="file" name="coverImage" class="ok-form-control" accept="image/*" />
-                                            <small style="opacity:.75; font-weight:800;">Upload to replace. Max 5 MB.</small>
-                                        </div>
-                                        @if (!string.IsNullOrWhiteSpace(Model.CoverUrl))
-                                        {
+                                            <div>
+                                                <div style="font-weight:800; opacity:.9;">Current Image</div>
+                                                <small style="opacity:.75; font-weight:800;">
+                                                    @if (Model.CoverUrl?.StartsWith("http://", StringComparison.OrdinalIgnoreCase) == true || 
+                                                         Model.CoverUrl?.StartsWith("https://", StringComparison.OrdinalIgnoreCase) == true)
+                                                    {
+                                                        <span>External URL</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Uploaded File</span>
+                                                    }
+                                                </small>
+                                            </div>
                                             <button type="submit"
                                                     class="btn-ok-danger"
                                                     formaction="@Url.Action("RemoveBookCover", "Staff")"
@@ -114,7 +119,48 @@
                                                     onclick="return confirm('Remove current cover image?');">
                                                 <i class="bi bi-trash me-1"></i> Remove Cover
                                             </button>
-                                        }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="ok-flex ok-gap-3 ok-flex-wrap ok-items-center ok-mb-3">
+                                            <div class="ok-no-image ok-no-image-border" style="width:120px; height:160px; border-radius:8px; font-size:.8rem;">NO IMAGE</div>
+                                        </div>
+                                    }
+
+                                    <!-- Image Source Toggle -->
+                                    <div class="ok-card ok-mb-3" style="box-shadow: var(--ok-shadow-sm); border-radius:14px;">
+                                        <div class="ok-card-body" style="padding: 1rem 1.25rem;">
+                                            <div class="ok-flex ok-items-center ok-justify-between ok-flex-wrap ok-gap-2">
+                                                <div>
+                                                    <div style="font-weight:900; color:var(--ok-title);">
+                                                        Update Image Source
+                                                    </div>
+                                                    <div style="opacity:.8; font-weight:700; font-size:.9rem;">
+                                                        Choose between uploading a file or providing a URL
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-check form-switch" style="margin:0;">
+                                                    <input type="checkbox" class="form-check-input" id="useUrlSwitch" />
+                                                    <label class="form-check-label" for="useUrlSwitch" style="font-weight:800;">
+                                                        Use URL
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- File Upload Section -->
+                                    <div id="uploadSection">
+                                        <input type="file" name="coverImage" id="coverImageFile" class="ok-form-control" accept="image/*" />
+                                        <small style="opacity:.75; font-weight:800;">Upload to replace. Max 5 MB.</small>
+                                    </div>
+
+                                    <!-- URL Input Section -->
+                                    <div id="urlSection" style="display:none;">
+                                        <input type="url" name="coverImageUrl" id="coverImageUrl" class="ok-form-control" placeholder="https://example.com/image.jpg" />
+                                        <small style="opacity:.75; font-weight:800;">Enter a direct URL to an image (must start with http:// or https://)</small>
                                     </div>
                                 </div>
                             </div>
@@ -170,10 +216,30 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Optional: add validation + loading + toast on submit
+        // Toggle between file upload and URL input
         document.addEventListener("DOMContentLoaded", function () {
             var form = document.getElementById("bookEditForm");
             if (!form) return;
+
+            var useUrlSwitch = document.getElementById("useUrlSwitch");
+            var uploadSection = document.getElementById("uploadSection");
+            var urlSection = document.getElementById("urlSection");
+            var fileInput = document.getElementById("coverImageFile");
+            var urlInput = document.getElementById("coverImageUrl");
+
+            useUrlSwitch.addEventListener("change", function () {
+                if (this.checked) {
+                    uploadSection.style.display = "none";
+                    urlSection.style.display = "block";
+                    fileInput.value = "";
+                    fileInput.removeAttribute("required");
+                } else {
+                    uploadSection.style.display = "block";
+                    urlSection.style.display = "none";
+                    urlInput.value = "";
+                    urlInput.removeAttribute("required");
+                }
+            });
 
             form.addEventListener("submit", function (e) {
                 var submitter = e.submitter || null;
